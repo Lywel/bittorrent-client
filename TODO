@@ -3,3 +3,8 @@
 [ ] Make a meeting at 5:30 a.m. on tuesday to discuss our plans for multithreading implementation
 [ ] Make a testsuite
 [ ] Make a README
+[ ] Parse the bencode
+	[x] Create a dictionary like datastruct
+	[ ] Tokenize the bencode
+	[ ] Fill the dictionary
+	[ ] Dump the dictionary content in JSON
