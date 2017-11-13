@@ -1,0 +1,50 @@
+You can find in this tarball several .torrent files to test your client with.
+These files are seeded on the epita network with real functionning clients.
+
+The following torrents should create the following results:
+
+congratulations_*.torrent:
+  - Congratulations.txt
+
+myreadiso-subject_*.torrent:
+  - myreadiso-subject.pdf
+
+images_*.torrent:
+  - images/
+    - adventure-time.jpg
+    - dragon_ball.jpg
+    - dragon_ball2.jpg
+    - ghibli.jpg
+    - over_the_garden_wall.jpg
+    - over_the_garden_wall1.jpg
+    - red-dead-redemption.jpg
+    - tombeau_des_lucioles.jpg
+    - zelda.jpg
+
+advanced_dir_*.torrent:
+  - advanced_dir/
+    - dir1/
+      - subdir1/
+        - secret.png
+      - surprise.txt
+    - dir2/
+      - subdir2/
+        - slides-malloc.pdf
+      - wallpaper_4k.jpg
+    - empty.txt
+    - empty2.txt
+    - small.txt
+
+Each .torrent file exists in 5 copies:
+*_basic: all the seeding peers have 100% of the original files, and seed normally.
+*_slow_disconnect: the peers disconnect sometimes, forcing you to recontact the
+  tracker.
+*_split: the peers have either the first 50% of the content, or the other 50%.
+*_rogue: some peers send garbage data instead of real blocks.
+*_seed: these torrents accept your client as a seeding client, allowing you to
+  try your client in a "sandbox" environment. No peers are seeding on these torrents
+  by default.
+
+Please note that for all the .torrent files except the *_seed ones, your client
+will *not* be added to the seeding peers list, meaning the peers returned by the
+tracker will always be working as intended.
