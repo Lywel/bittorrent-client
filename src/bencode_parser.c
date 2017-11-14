@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "debug.h"
 #include "bencode_parser.c"
 
 static char *
@@ -24,7 +25,54 @@ bencode_get_content(char *path, long long *size)
   return bencode;
 }
 
-struct be_node *
+static void
+bencode_go_until(char end, char **bencode, long long *size)
+{
+  while (**bencode != end)
+  {
+    *size--;
+    *bencode++;
+  }
+  *bencode++;
+  *size--;
+}
+
+static char *
+bencode_parse_str(char **bencode, long long *size)
+{
+  char **start = bencode;
+  bencode_go_until(':', bencode, size);
+  long long len = strtoll(*start, *bencode - 1, 10);
+
+  char *str = malloc((len + 1) * sizeof(char));
+  if (str)
+  {
+    strncpy(str, bencode, len);
+    str[len] = 0;
+  }
+  *bencode += len;
+  *size -= len;
+
+  return str;
+}
+
+static long long
+bencode_parse_int(char **bencode, long long *size)
+{
+  *bencode++;
+  *size--;
+  char **start = bencode;
+  bencode_go_until('e', bencode, size);
+  return strtoll(*start, *bencode - 1, 10);
+}
+
+static struct be_node **
+bencode_parse_lst(char **bencode, long long *size)
+{
+
+}
+
+static struct be_node *
 bencode_decode(char **bencode, long long *size)
 {
   struct be_node *node = NULL;
@@ -43,12 +91,10 @@ bencode_decode(char **bencode, long long *size)
     node->val.i = bencode_parse_int(bencode, size);
     return node;
   case 'l':
-    node = be_node_init(BE_LST);
-    // TODO: Parse lists
+    node = bencode_parse_lst(bencode, size);
     return node;
   case 'd':
-    node = be_node_init(BE_DIC);
-    // TODO: Parse dictionaries
+    node = bencode_parse_dic(bencode, size);
     return node;
   default:
     return node;
