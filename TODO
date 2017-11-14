@@ -4,7 +4,11 @@
 [ ] Make a testsuite
 [ ] Make a README
 [ ] Parse the bencode
-	[x] Create a dictionary like datastruct
-	[ ] Tokenize the bencode
-	[ ] Fill the dictionary
-	[ ] Dump the dictionary content in JSON
+	[x] Open the file and store the content in a string
+	[x] Check the string recusivly for datatypes
+	[ ] Fill the tree
+		[ ] Parse strings
+		[ ] Parse ints
+		[ ] Parse lists
+		[ ] Parse dictionaries
+	[ ] Dump the tree in JSON
