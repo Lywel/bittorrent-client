@@ -1,6 +1,7 @@
 *~
 *.swp
 *.o
+*.out
 *.a
 *.so
 *.log
