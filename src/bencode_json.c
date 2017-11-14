@@ -33,7 +33,13 @@ bencode_dump_json(FILE* cout, struct be_node *node)
   switch (node->type)
   {
   case BE_STR:
-    fprintf(cout, "\"%s\"", node->val.s);
+    fprintf(cout, "\"");
+    for (long long i = 0; node->val.s[i]; ++i)
+    {
+      unsigned char c = node->val.s[i];
+      fprintf(cout, (c < 0x20 || c > 0x7E || c == '"') ? "\\u00%02x":"%c", c);
+    }
+    fprintf(cout, "\"");
     break;
   case BE_INT:
     fprintf(cout, "%lld", node->val.i);
