@@ -3,7 +3,7 @@
 #include <stddef.h>
 
 char *
-peerid_generate(void)
+peer_id_generate(void)
 {
   char *peer_id = calloc(21, 1);
   strcpy(peer_id, "MB2020");

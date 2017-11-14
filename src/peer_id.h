@@ -1,6 +1,6 @@
 #ifndef PEER_ID_H
 # define PEER_ID_H
 
-char *peerid_generate();
+char *peer_id_generate();
 
 #endif
