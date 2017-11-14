@@ -1,0 +1,21 @@
+2.3.1
+
+When a peer wants to transfer a file it contacts the tracker.
+The tracker returns a list of the peers currently trasnferring the file
+as a bencoded dicts.
+
+Three fields in dict : peer id, ip, port.
+The list length in bytes < n * (23 + 259 + 7)
+
+If the client precised compact=1 then each peer should be reprensented as a
+bencoded string on 6 bytes : 4 bytes ipv4 address + 2 bytes port number
+<= encoded with network byte order
+
+fd = 
+  bind(fd, addr)
+  listen(fd)
+
+while (client = accept(fd))
+  fork()
+  read/write(client)
+  close(client)
