@@ -7,8 +7,8 @@ list_dump_json(FILE* cout, struct be_node **list)
 {
   for (long long i = 0; list[i]; ++i)
   {
-    bencode_dump_json(cout, list[i]->val);
-    if (dico[i + 1])
+    bencode_dump_json(cout, list[i]);
+    if (list[i + 1])
       fprintf(cout, ",");
   }
 }
@@ -18,7 +18,7 @@ dico_dump_json(FILE* cout, struct be_dico **dico)
 {
   for (long long i = 0; dico[i]; ++i)
   {
-    fprintf(cout, "%s:", dico[i]->key);
+    fprintf(cout, "\"%s\":", dico[i]->key);
     bencode_dump_json(cout, dico[i]->val);
     if (dico[i + 1])
       fprintf(cout, ",");
@@ -33,19 +33,19 @@ bencode_dump_json(FILE* cout, struct be_node *node)
   switch (node->type)
   {
   case BE_STR:
-    fprintf(cout, "\"%s\"", node->val);
+    fprintf(cout, "\"%s\"", node->val.s);
     break;
   case BE_INT:
-    fprintf(cout, "%lld", node->val);
+    fprintf(cout, "%lld", node->val.i);
     break;
   case BE_LST:
     fprintf(cout, "[");
-    list_dump_json(cout, node->val);
+    list_dump_json(cout, node->val.l);
     fprintf(cout, "]");
     break;
   case BE_DIC:
     fprintf(cout, "{");
-    dico_dump_json(cout, node->val);
+    dico_dump_json(cout, node->val.d);
     fprintf(cout, "}");
     break;
   }

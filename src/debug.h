@@ -1,7 +1,7 @@
 #ifndef DEBUG_H
 # define DEBUG_H
 
-# ifdef DEBUG_LVL >= 1
+# if DEBUG_LVL >= 1
 #  define DEBUG(FMT, ...) printf(stderr, FMT, __VA_ARGS__)
 # else
 #  define DEBUG(FMT, ...)

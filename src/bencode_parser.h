@@ -1,5 +1,6 @@
 #ifndef BENCODE_PARSER_H
 # define BENCODE_PARSER_H
+# include <stdio.h>
 
 enum be_type
 {
@@ -23,10 +24,11 @@ struct be_node
     char *s;
     long long i;
     struct be_node **l;
-    struct be_dico *d;
+    struct be_dico **d;
   } val;
 };
 
+struct be_node *bencode_decode(char **bencode, long long *size);
 int bencode_file_pretty_print(FILE *cout, char *path);
 
 #endif
