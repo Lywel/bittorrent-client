@@ -8,7 +8,7 @@
 *.core
 *.gdbinit
 *.torrent
-/*/README
+*vgcore.*
 
 # http://www.gnu.org/software/automake
 
