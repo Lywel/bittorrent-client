@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <curl/curl.h>
 #include "peer_id.h"
+#include "request_tracker.h"
 
 /**
  * 117 beeing the length of peer_id + info_hash + port added to all the
@@ -31,7 +32,7 @@ request_create(struct be_node *dico)
   return request;
 }
 
-size_t
+static size_t
 write_callback(char *ptr, size_t size, size_t nmemb, char *userdata)
 {
   memcpy(userdata, ptr, 6);

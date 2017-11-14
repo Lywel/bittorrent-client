@@ -1,4 +1,5 @@
 #include "bencode_parser.h"
+#include "dico_get.h"
 #include <string.h>
 
 char *
