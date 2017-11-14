@@ -4,13 +4,27 @@ When a peer wants to transfer a file it contacts the tracker.
 The tracker returns a list of the peers currently trasnferring the file
 as a bencoded dicts.
 
-Three fields in dict : peer id, ip, port.
-The list length in bytes < n * (23 + 259 + 7)
-
 If the client precised compact=1 then each peer should be reprensented as a
 bencoded string on 6 bytes : 4 bytes ipv4 address + 2 bytes port number
 <= encoded with network byte order
 
+MB2020
+
+HTTP GET request :
+
+peer_id   =   
+
+info_hash : 20 bytes sha1 = pieces in info dic
+peer_id   : 20 bytes string, randomly generated
+ip        : optional param ip (optionnal)
+port      : common behavior 6881, 6882, until 6889
+uploaded  : total amount uploaded in base ten
+downloaded: total amount downloaded in base ten
+left      : the number of bytes it still have to download
+event     : started, completed or stopped (optionnal)
+
+example : GET /announce?peer_id=aaaaaaaaaaaaaaaaaaaaa&info_hash=aaaaaaaaaaaaaaaaaaaa
+          &port=6881&left=0&downloaded=100&uploaded=0&compact=1
 fd = 
   bind(fd, addr)
   listen(fd)
