@@ -69,7 +69,61 @@ bencode_parse_int(char **bencode, long long *size)
 static struct be_node **
 bencode_parse_lst(char **bencode, long long *size)
 {
+  long long nb = 0;
+  *bencode++;
+  *size--;
+  struct be_node** list = NULL;
+  while (**bencode != 'e')
+  {
+    nb++;
+    list = realloc(list, (nb + 1) * sizeof(struct be_list *));
+    list[nb - 1] = bencode_decode(bencode, size);
+  }
+  *bencode++;
+  *size--;
 
+  if (!nb)
+    list = realloc(list, sizeof(struct be_list *));
+
+  list[nb] = NULL;
+  return list;
+}
+
+static struct be_dico *
+bencode_parse_dic(char **bencode, long long *size)
+{
+  long long nb = 0;
+  *bencode++;
+  *size--;
+  struct be_dico **dico = NULL;
+  while (**bencode != 'e')
+  {
+    nb++;
+    dico = realloc(dico, (nb + 1) * sizeof(struct be_dico *));
+    dico[nb - 1] = malloc(sizeof(struct be_dico));
+    dico[nb - 1]->key = bencode_parse_str(bencode, size);
+    dico[nb - 1]->val = bencode_decode(bencode, size);
+  }
+  *bencode++;
+  *size--;
+
+  if (!nb)
+    dico = realloc(dico, sizeof(struct be_list *));
+
+  dico[nb] = NULL;
+  return dico;
+}
+
+static struct be_node *
+be_node_init(enum be_type type)
+{
+  struct be_node *node = malloc(sizeof(be_node));
+  if (node)
+  {
+    memset(node, 0, sizeof(be_node));
+    node->type = type;
+  }
+  return node;
 }
 
 static struct be_node *
@@ -91,10 +145,12 @@ bencode_decode(char **bencode, long long *size)
     node->val.i = bencode_parse_int(bencode, size);
     return node;
   case 'l':
-    node = bencode_parse_lst(bencode, size);
+    node = be_node_init(BE_LST);
+    node->val.l = bencode_parse_lst(bencode, size);
     return node;
   case 'd':
-    node = bencode_parse_dic(bencode, size);
+    node = be_node_init(BE_DIC);
+    node->val.d = bencode_parse_dic(bencode, size);
     return node;
   default:
     return node;
@@ -106,7 +162,8 @@ bencode_file_pretty_print(FILE* cout, char *path)
 {
   long long len = 0;
   char *bencode = bencode_get_content(path, &len);
-  struct be_node *be_tree = bencode_decode(&bencode, &len);
-
+  struct be_node *node = bencode_decode(&bencode, &len);
+  bencode_dump_json(cout, node);
+  bencode_free(node);
   free(bencode);
 }
