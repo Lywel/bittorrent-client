@@ -33,9 +33,10 @@ request_create(struct be_node *dico)
 }
 
 static size_t
-write_callback(char *ptr, size_t size, size_t nmemb, char *userdata)
+write_callback(char *ptr, size_t size, size_t nmemb, char **userdata)
 {
-  memcpy(userdata, ptr, 6);
+  *userdata = calloc(nmemb, size);
+  memcpy(*userdata, ptr, 6);
   return size * nmemb;
 }
 
@@ -46,7 +47,7 @@ peer_list_get(void)
   CURLcode res;
 
   char *request = request_create(dico); //don't know were to get that
-  char *answer = calloc(7, 1);
+  char *answer = NULL;
 
   curl = curl_easy_init();
 
@@ -60,5 +61,8 @@ peer_list_get(void)
   curl_easy_perform(curl);
   free(request);
 
-  return bencode_decode(&answer, 6);
+  struct be_dico *peer_list = bencode_decode(&answer, strlen(answer));
+  free(answer);
+
+  return peer_list;
 }
