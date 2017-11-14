@@ -1,0 +1,9 @@
+my-bittorrent
+
+Overview :
+
+  my-bittorrent is a simple program allowing to download and upload torrents
+  following the BitTorrent protocol.
+
+I)  Building executable
+II) Usage
