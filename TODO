@@ -1,14 +1,16 @@
 [ ] Read the subject twice
 [ ] Understand it
-[ ] Make a meeting at 5:30 a.m. on tuesday to discuss our plans for multithreading implementation
+  [ ] read the official bitTorrent doc and link it with subject
+  [ ] write helper file with clearer descriptions of functions to implement
+[x] Make a meeting at 5:30 p.m. on tuesday to discuss our plans for multithreading implementation
 [ ] Make a testsuite
 [ ] Make a README
 [ ] Parse the bencode
-	[x] Open the file and store the content in a string
-	[x] Check the string recusivly for datatypes
-	[ ] Fill the tree
-		[ ] Parse strings
-		[ ] Parse ints
-		[ ] Parse lists
-		[ ] Parse dictionaries
-	[ ] Dump the tree in JSON
+  [x] Open the file and store the content in a string
+  [x] Check the string recusivly for datatypes
+  [ ] Fill the tree
+    [ ] Parse strings
+    [ ] Parse ints
+    [ ] Parse lists
+    [ ] Parse dictionaries
+  [ ] Dump the tree in JSON
