@@ -19,7 +19,7 @@ long long
 dico_find_int(struct be_node *node, const char *key)
 {
   if (node->type != BE_DIC)
-    return NULL;
+    return 0;
   struct be_dico **dico = node->val.d;
   size_t i = 0;
   while (dico[i] && dico[i]->val->type == BE_INT && strcmp(dico[i]->key, key))
