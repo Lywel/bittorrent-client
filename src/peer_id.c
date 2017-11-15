@@ -5,7 +5,7 @@
 char *
 peer_id_generate(void)
 {
-  char *peer_id = calloc(21, 1);
+  char *peer_id = calloc(21, sizeof(char));
   strcpy(peer_id, "MB2020");
   for (size_t i = 6; i < 20; ++i)
     peer_id[i] = 'A' + (rand() % 26);
