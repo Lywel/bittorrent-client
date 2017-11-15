@@ -18,3 +18,8 @@
 [ ] More advanced autotools config
 [ ] Split he project in modules
 [ ] Compile each modules as a distinct static 'comfort' library
+[ ] TO FREE // CLOSE
+  [ ] free  : info_hash in create_request
+  [ ] free  : request in create_request
+  [ ] free  :answer in get_peer_list
+  [ ] close : socket in init_socket
