@@ -36,7 +36,7 @@ create_request(struct be_node *dico)
 static size_t
 write_callback(char *ptr, size_t size, size_t nmemb, char **userdata)
 {
-  *userdata = calloc(nmemb, size);
+  *userdata = calloc(nmemb + 1, size);
   memcpy(*userdata, ptr, 6);
   return size * nmemb;
 }
