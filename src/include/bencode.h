@@ -28,9 +28,8 @@ struct be_node
   } val;
 };
 
-struct be_node *be_decode(char **bencode, long long *size);
 struct be_node *bencode_file_decode(char *path);
-struct be_node *bencode_decode(char *bencode, long long size);
+struct be_node *bencode_decode(char *bencode);
 void bencode_free_node(struct be_node *node);
 int bencode_file_pretty_print(char *path);
 

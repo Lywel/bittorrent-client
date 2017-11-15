@@ -16,6 +16,47 @@ bencode_go_until(char end, char **bencode, long long *size)
   --(*size);
 }
 
+static struct be_node *
+be_node_init(enum be_type type)
+{
+  struct be_node *node = malloc(sizeof(struct be_node));
+  if (node)
+  {
+    memset(node, 0, sizeof(struct be_node));
+    node->type = type;
+  }
+  return node;
+}
+
+struct be_node *
+be_decode(char **bencode, long long *size)
+{
+  struct be_node *node = NULL;
+
+  if (!*size)
+    return node;
+
+  switch (**bencode)
+  {
+  case 'i':
+    node = be_node_init(BE_INT);
+    node->val.i = bencode_parse_int(bencode, size);
+    return node;
+  case 'l':
+    node = be_node_init(BE_LST);
+    node->val.l = bencode_parse_lst(bencode, size);
+    return node;
+  case 'd':
+    node = be_node_init(BE_DIC);
+    node->val.d = bencode_parse_dic(bencode, size);
+    return node;
+  default:
+    node = be_node_init(BE_STR);
+    node->val.s = bencode_parse_str(bencode, size);
+    return node;
+  }
+}
+
 char *
 bencode_parse_str(char **bencode, long long *size)
 {
