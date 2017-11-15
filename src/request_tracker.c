@@ -11,7 +11,7 @@
  * 117 beeing the length of peer_id + info_hash + port added to all the
  * nescessary keywords related to the GET post
 */
-#define C_SIZE 118
+#define C_SIZE 63
 
 static char *
 create_request(struct be_node *dico)
@@ -20,11 +20,12 @@ create_request(struct be_node *dico)
   char *announce = dico_find_str(dico, "announce");
   char *info_hash = dico_find_str(dico, "info_hash");
   char *port = dico_find_str(dico, "port");
-  char *bytes_left = "0"; //bytes_left_get();
-  char *bytes_dwl = "0"; //bytes_dwl_get();
-  char *bytes_upl = "0"; //bytes_upl_get();
-  size_t req_len = C_SIZE + strlen(bytes_left) + strlen(bytes_dwl)
-                          + strlen(bytes_upl) + strlen(announce);
+  char *bytes_left = "00"; //bytes_left_get();
+  char *bytes_dwl = "00"; //bytes_dwl_get();
+  char *bytes_upl = "00"; //bytes_upl_get();
+  size_t req_len = strlen(peer_id) + strlen(announce) + strlen(info_hash)
+                 + strlen(port) + strlen(bytes_left) + strlen(bytes_dwl)
+                 + strlen(bytes_upl) + C_SIZE;
 
   char *request = calloc(req_len, sizeof(char));
 
