@@ -3,26 +3,33 @@
 #include "bencode_parser.h"
 #include "dico_finder.h"
 
-char *
-dico_find_str(struct be_node *node, const char *key)
+struct be_node *
+dico_find(struct be_node *node, const char *key)
 {
   if (node->type != BE_DIC)
     return NULL;
   struct be_dico **dico = node->val.d;
   size_t i = 0;
-  while (dico[i] && dico[i]->val->type == BE_STR && strcmp(dico[i]->key, key))
+  while (dico[i] && strcmp(dico[i]->key, key))
     ++i;
-  return dico[i]->val->val.s;
+
+  return strcmp(key, dico[i]->key) ? NULL : dico[i]->val;
+}
+
+char *
+dico_find_str(struct be_node *node, const char *key)
+{
+  struct be_node *n = dico_find(node, key);
+  if (n->type != BE_STR)
+    return NULL;
+  return n ? n->val.s : NULL;
 }
 
 long long
 dico_find_int(struct be_node *node, const char *key)
 {
-  if (node->type != BE_DIC)
+  struct be_node *n = dico_find(node, key);
+  if (n->type != BE_INT)
     return 0;
-  struct be_dico **dico = node->val.d;
-  size_t i = 0;
-  while (dico[i] && dico[i]->val->type == BE_INT && strcmp(dico[i]->key, key))
-    ++i;
-  return dico[i]->val->val.i;
+  return n ? n->val.i : 0;
 }
