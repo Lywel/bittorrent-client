@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <curl/curl.h>
 #include "peer_id.h"
+#include "dico_finder.h"
 #include "request_tracker.h"
 
 /**
@@ -11,12 +12,12 @@
 #define C_SIZE 118
 
 static char *
-request_create(struct be_node *dico)
+create_request(struct be_node *dico)
 {
   char *peer_id = peer_id_generate();
-  char *announce = dico_get_str(dico, "announce");
-  char *info_hash = dico_get_str(dico, "info_hash");
-  char *port = dico_get_str(dico, "port");
+  char *announce = dico_find_str(dico, "announce");
+  char *info_hash = dico_find_str(dico, "info_hash");
+  char *port = dico_find_str(dico, "port");
   char *bytes_left = bytes_left_get();
   char *bytes_dwl = bytes_dwl_get();
   char *bytes_upl = bytes_upl_get();
@@ -41,12 +42,12 @@ write_callback(char *ptr, size_t size, size_t nmemb, char **userdata)
 }
 
 struct be_dico *
-peer_list_get(void)
+get_peer_list(struct be_node *dico)
 {
   CURL *curl;
   CURLcode res;
 
-  char *request = request_create(dico); //don't know were to get that
+  char *request = create_request(dico);
   char *answer = NULL;
 
   curl = curl_easy_init();
@@ -61,7 +62,8 @@ peer_list_get(void)
   curl_easy_perform(curl);
   free(request);
 
-  struct be_dico *peer_list = bencode_decode(&answer, strlen(answer));
+  long long ans_len = strlen(answer);
+  struct be_dico *peer_list = bencode_decode(&answer, &and_len);
   free(answer);
 
   return peer_list;
