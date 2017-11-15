@@ -7,6 +7,7 @@ my_bittorrent_SOURCES = \
   bencode.c \
   bencode_json.c \
   bencode_parser.c \
+  debug.c \
   request_tracker.c \
   dico_finder.c \
   peer_id.c \

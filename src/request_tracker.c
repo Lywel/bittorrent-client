@@ -52,7 +52,7 @@ get_peer_list(struct be_node *dico)
 {
   CURL *curl;
   printf("puts");
-  DEBUG("Creating request", 1);
+  debug("Creating request\n");
   char *req = create_request(dico);
   char *answer = NULL;
 
