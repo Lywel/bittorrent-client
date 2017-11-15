@@ -1,8 +1,10 @@
 #ifndef DEBUG_H
 # define DEBUG_H
+# include <stdarg.h>
 
 # if DEBUG_LVL >= 1
-#  define DEBUG(FMT, ...) printf(stderr, FMT, __VA_ARGS__)
+#  define DEBUG(FMT, ...) \
+     fprintf(stderr, "=== DEBUG === \n"FMT"\n=== /DEBUG ===", __VA_ARGS__)
 # else
 #  define DEBUG(FMT, ...)
 # endif
@@ -21,7 +23,7 @@ static inline void formatmsg(char c, ...)
   va_start(args, c);
 
   // TODO: print peer messages
-  printf(PEERMSG_FMT, args);
+  //printf(PEERMSG_FMT, args);
 
   va_end(args);
 }
