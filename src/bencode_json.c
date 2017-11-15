@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <ctype.h>
+#include "bencode.h"
 #include "bencode_parser.h"
 #include "bencode_json.h"
 
@@ -37,7 +39,7 @@ bencode_dump_json(struct be_node *node)
     for (long long i = 0; node->val.s[i]; ++i)
     {
       unsigned char c = node->val.s[i];
-      printf((c < 0x20 || c > 0x7E || c == '"') ? "\\u00%02x":"%c", c);
+      printf((!isprint(c) || c == '"') ? "\\u00%02x":"%c", c);
     }
     printf("\"");
     break;

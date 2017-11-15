@@ -1,6 +1,6 @@
 #include <string.h>
 #include <stdio.h>
-#include "bencode_parser.h"
+#include "bencode.h"
 #include "dump_peers.h"
 
 static int download(char *path)

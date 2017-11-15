@@ -1,27 +1,7 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "bencode_json.h"
+#include "bencode.h"
 #include "bencode_parser.h"
-
-static char *
-bencode_get_content(char *path, long long *size)
-{
-  FILE* f = fopen(path, "r");
-  if (!f)
-    return NULL;
-
-  fseek(f, 0, SEEK_END);
-  *size = ftell(f);
-  rewind(f);
-
-  char *bencode = malloc((*size + 1) * sizeof(char));
-  if (bencode)
-    fread(bencode, sizeof(char), *size, f);
-
-  fclose(f);
-  return bencode;
-}
 
 static void
 bencode_go_until(char end, char **bencode, long long *size)
@@ -36,7 +16,7 @@ bencode_go_until(char end, char **bencode, long long *size)
   --(*size);
 }
 
-static char *
+char *
 bencode_parse_str(char **bencode, long long *size)
 {
   char *start = *bencode;
@@ -55,7 +35,7 @@ bencode_parse_str(char **bencode, long long *size)
   return str;
 }
 
-static long long
+long long
 bencode_parse_int(char **bencode, long long *size)
 {
   ++(*bencode);
@@ -65,7 +45,7 @@ bencode_parse_int(char **bencode, long long *size)
   return atoll(start);
 }
 
-static struct be_node **
+struct be_node **
 bencode_parse_lst(char **bencode, long long *size)
 {
   long long nb = 0;
@@ -76,7 +56,7 @@ bencode_parse_lst(char **bencode, long long *size)
   {
     nb++;
     list = realloc(list, (nb + 1) * sizeof(struct be_list *));
-    list[nb - 1] = bencode_decode(bencode, size);
+    list[nb - 1] = be_decode(bencode, size);
   }
   ++(*bencode);
   --(*size);
@@ -88,7 +68,7 @@ bencode_parse_lst(char **bencode, long long *size)
   return list;
 }
 
-static struct be_dico **
+struct be_dico **
 bencode_parse_dic(char **bencode, long long *size)
 {
   long long nb = 0;
@@ -101,7 +81,7 @@ bencode_parse_dic(char **bencode, long long *size)
     dico = realloc(dico, (nb + 1) * sizeof(struct be_dico *));
     dico[nb - 1] = malloc(sizeof(struct be_dico));
     dico[nb - 1]->key = bencode_parse_str(bencode, size);
-    dico[nb - 1]->val = bencode_decode(bencode, size);
+    dico[nb - 1]->val = be_decode(bencode, size);
   }
   ++(*bencode);
   --(*size);
@@ -113,88 +93,3 @@ bencode_parse_dic(char **bencode, long long *size)
   return dico;
 }
 
-static struct be_node *
-be_node_init(enum be_type type)
-{
-  struct be_node *node = malloc(sizeof(struct be_node));
-  if (node)
-  {
-    memset(node, 0, sizeof(struct be_node));
-    node->type = type;
-  }
-  return node;
-}
-
-struct be_node *
-bencode_decode(char **bencode, long long *size)
-{
-  struct be_node *node = NULL;
-
-  if (!*size)
-    return node;
-
-  switch (**bencode)
-  {
-  case 'i':
-    node = be_node_init(BE_INT);
-    node->val.i = bencode_parse_int(bencode, size);
-    return node;
-  case 'l':
-    node = be_node_init(BE_LST);
-    node->val.l = bencode_parse_lst(bencode, size);
-    return node;
-  case 'd':
-    node = be_node_init(BE_DIC);
-    node->val.d = bencode_parse_dic(bencode, size);
-    return node;
-  default:
-    node = be_node_init(BE_STR);
-    node->val.s = bencode_parse_str(bencode, size);
-    return node;
-  }
-}
-
-void
-bencode_free_node(struct be_node *node)
-{
-  if (node)
-  {
-    long long i;
-    switch (node->type)
-    {
-    case BE_LST:
-      for (i = 0; node->val.l[i]; ++i)
-        bencode_free_node(node->val.l[i]);
-      free(node->val.l);
-      break;
-    case BE_DIC:
-      for (i = 0; node->val.d[i]; ++i)
-      {
-        free(node->val.d[i]->key);
-        bencode_free_node(node->val.d[i]->val);
-        free(node->val.d[i]);
-      }
-      free(node->val.d);
-      break;
-    case BE_STR:
-      free(node->val.s);
-      break;
-    default:
-      break;
-    }
-    free(node);
-  }
-}
-
-int
-bencode_file_pretty_print(char *path)
-{
-  long long len = 0;
-  char *bencode = bencode_get_content(path, &len);
-  char *ptr = bencode;
-  struct be_node *node = bencode_decode(&bencode, &len);
-  bencode_dump_json(node);
-  bencode_free_node(node);
-  free(ptr);
-  return 0;
-}
