@@ -17,10 +17,7 @@ bencode_get_content(char *path, long long *size)
 
   char *bencode = malloc((*size + 1) * sizeof(char));
   if (bencode)
-  {
     fread(bencode, sizeof(char), *size, f);
-    bencode[*size] = EOF;
-  }
 
   fclose(f);
   return bencode;
@@ -157,14 +154,47 @@ bencode_decode(char **bencode, long long *size)
   }
 }
 
+void
+bencode_free_node(struct be_node *node)
+{
+  if (node)
+  {
+    long long i;
+    switch (node->type)
+    {
+    case BE_LST:
+      for (i = 0; node->val.l[i]; ++i)
+        bencode_free_node(node->val.l[i]);
+      free(node->val.l);
+      break;
+    case BE_DIC:
+      for (i = 0; node->val.d[i]; ++i)
+      {
+        free(node->val.d[i]->key);
+        bencode_free_node(node->val.d[i]->val);
+        free(node->val.d[i]);
+      }
+      free(node->val.d);
+      break;
+    case BE_STR:
+      free(node->val.s);
+      break;
+    default:
+      break;
+    }
+    free(node);
+  }
+}
+
 int
 bencode_file_pretty_print(char *path)
 {
   long long len = 0;
   char *bencode = bencode_get_content(path, &len);
+  char *ptr = bencode;
   struct be_node *node = bencode_decode(&bencode, &len);
   bencode_dump_json(node);
-  //bencode_free(node);
-  //free(bencode);
+  bencode_free_node(node);
+  free(ptr);
   return 0;
 }
