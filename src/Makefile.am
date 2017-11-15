@@ -1,5 +1,5 @@
 AM_CFLAGS = -Wall -Wextra -Werror -std=c99 -pedantic
-AM_LDFLAGS = -lcurl
+AM_LDFLAGS = -lcurl -lcrypto
 
 bin_PROGRAMS = my-bittorrent
 my_bittorrent_CPPFLAGS = -I$(srcdir)/include
@@ -12,4 +12,5 @@ my_bittorrent_SOURCES = \
   dico_finder.c \
   peer_id.c \
   dump_peers.c \
-  my-bittorrent.c
+  my-bittorrent.c \
+  hash.c
