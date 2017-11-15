@@ -1,10 +1,7 @@
+AM_CFLAGS = -Wall -Wextra -Werror -std=c99 -pedantic
 
-# AM_CFLAGS = -Wall -Wextra -Werror -std=c99 -pedantic
-
-# Tell automake to build my-bittorrent
 bin_PROGRAMS = my-bittorrent
-
-# Tell automake what files are the sources of my-bittorrent
+my_bittorrent_CPPFLAGS = -I$(top_srcdir)/include
 my_bittorrent_SOURCES = \
   bencode_json.c \
   bencode_parser.c \
