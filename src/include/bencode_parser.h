@@ -29,6 +29,6 @@ struct be_node
 };
 
 struct be_node *bencode_decode(char **bencode, long long *size);
-int bencode_file_pretty_print(FILE *cout, char *path);
+int bencode_file_pretty_print(char *path);
 
 #endif

@@ -3,6 +3,6 @@
 
 #include "bencode_parser.h"
 
-struct be_dico *peer_list_get(void);
+struct be_dico *get_peer_list(struct be_dico *dico);
 
 #endif

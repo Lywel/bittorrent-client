@@ -5,4 +5,5 @@ my_bittorrent_CPPFLAGS = -I$(srcdir)/include
 my_bittorrent_SOURCES = \
   bencode_json.c \
   bencode_parser.c \
+  dump_peers.c \
   my-bittorrent.c

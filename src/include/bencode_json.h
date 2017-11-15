@@ -3,6 +3,6 @@
 # include <stdio.h>
 # include "bencode_parser.h"
 
-void bencode_dump_json(FILE* cout, struct be_node *node);
+void bencode_dump_json(struct be_node *node);
 
 #endif

@@ -158,12 +158,12 @@ bencode_decode(char **bencode, long long *size)
 }
 
 int
-bencode_file_pretty_print(FILE* cout, char *path)
+bencode_file_pretty_print(char *path)
 {
   long long len = 0;
   char *bencode = bencode_get_content(path, &len);
   struct be_node *node = bencode_decode(&bencode, &len);
-  bencode_dump_json(cout, node);
+  bencode_dump_json(node);
   //bencode_free(node);
   //free(bencode);
   return 0;
