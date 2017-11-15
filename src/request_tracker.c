@@ -72,8 +72,7 @@ get_peer_list(struct be_node *dico)
   curl_easy_perform(curl);
   curl_free(request);
 
-  long long ans_len = strlen(answer);
-  struct be_node *peer_list = bencode_decode(answer, ans_len);
+  struct be_node *peer_list = bencode_decode(answer);
   free(answer);
 
   return peer_list;

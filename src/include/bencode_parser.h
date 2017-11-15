@@ -1,6 +1,7 @@
 #ifndef BENCODE_PARSER_H
 # define BENCODE_PARSER_H
 
+struct be_node *be_decode(char **bencode, long long *size);
 char *bencode_parse_str(char **bencode, long long *size);
 long long bencode_parse_int(char **bencode, long long *size);
 struct be_node **bencode_parse_lst(char **bencode, long long *size);
