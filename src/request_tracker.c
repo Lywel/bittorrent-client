@@ -7,12 +7,13 @@
 #include "dico_finder.h"
 #include "request_tracker.h"
 #include "debug.h"
+#include "hash.h"
 
 /**
  * 117 beeing the length of peer_id + info_hash + port added to all the
  * nescessary keywords related to the GET post
 */
-#define C_SIZE 63
+#define C_SIZE 83
 
 static char *
 create_request(struct be_node *dico)
@@ -21,14 +22,15 @@ create_request(struct be_node *dico)
   char *announce = dico_find_str(dico, "announce");
 
   struct be_node *info = dico_find(dico, "info");
-  char *info_hash = dico_find_str(info, "pieces");
+  unsigned char *pieces = (unsigned char *)dico_find_str(info, "pieces");
+  unsigned char *info_hash = get_sha1(pieces);
   char *port = "6882";
   char *bytes_left = "00"; //bytes_left_get();
   char *bytes_dwl = "00"; //bytes_dwl_get();
   char *bytes_upl = "00"; //bytes_upl_get();
-  size_t req_len = strlen(peer_id) + strlen(announce) + strlen(info_hash)
-                 + strlen(port) + strlen(bytes_left) + strlen(bytes_dwl)
-                 + strlen(bytes_upl) + C_SIZE;
+  size_t req_len = strlen(peer_id) + strlen(announce)
+                   + strlen(port) + strlen(bytes_left)
+                   + strlen(bytes_dwl) + strlen(bytes_upl) + C_SIZE;
 
   char *request = calloc(req_len, sizeof(char));
 
