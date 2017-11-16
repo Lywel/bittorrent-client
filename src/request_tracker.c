@@ -16,10 +16,10 @@
 */
 #define C_SIZE 83
 
-static int
+/*static long long
 get_file_length(struct be_node *info)
 {
-  int length = dico_find_int(info, "length");
+  long long length = dico_find_int(info, "length");
   if (!length)
   {
     struct be_node *files = dico_find(info, "files");
@@ -28,35 +28,45 @@ get_file_length(struct be_node *info)
   }
 
   return length;
-}
+}*/
 
 static char *
-create_request(struct be_node *dico)
+build_tracker_uri(struct be_node *dico, CURL *curl)
 {
+  char *urn = dico_find_str(dico, "announce");
   char *peer_id = generate_peer_id();
-  char *announce = dico_find_str(dico, "announce");
 
-  struct be_node *info = dico_find(dico, "info");
-  unsigned char *pieces = (unsigned char *)dico_find_str(info, "pieces");
-  unsigned char *info_hash = get_sha1(pieces);
+  char *pieces = dico_find_str(dico_find(dico, "info"), "pieces");
 
-  char *port = "6882";
-  char *bytes_left = "100"; //PLACE HOLDER, SHOULD START WITH FILE SIZE
-  char *bytes_dwl = "00"; //bytes_dwl_get();
-  char *bytes_upl = "00"; //bytes_upl_get();
-  size_t req_len = strlen(peer_id) + strlen(announce)
-                   + strlen(port) + strlen(bytes_left)
-                   + strlen(bytes_dwl) + strlen(bytes_upl) + C_SIZE;
+  unsigned char *info_hash = compute_sha1((unsigned char *)pieces);
+  char *e_info_hash = curl_easy_escape(curl, (char *)info_hash, 0);
 
-  char *request = calloc(req_len, sizeof(char));
+  char *port = "6881";
+  char *bytes_left = "0";
+  char *bytes_down = "0";
+  char *bytes_upld  = "0";
 
-  sprintf(request, "%s?peer_id=%s&info_hash=%s&port=%s&left=%s&downloaded=%s&"
-                   "uploaded=%s&compact=1",
-                   announce, peer_id, info_hash, port, bytes_left, bytes_dwl,
-                   bytes_upl);
-  return request;
+  char *format = "%s?peer_id=%s&info_hash=%s&port=%s&left=%s&downloaded=%s&"
+                "uploaded=%s&compact=1";
+
+  long long len = strlen(urn) + strlen(peer_id) + strlen(e_info_hash) + strlen(port)
+                + strlen(bytes_left) + strlen(bytes_down) + strlen(bytes_upld)
+                + strlen(format) - 12 + 1; // -12 for %s in format + 1 for \0
+
+  char *uri = calloc(len, sizeof(char));
+  if (!uri)
+    return NULL;
+
+  sprintf(uri, format,
+          urn, peer_id, e_info_hash, port, bytes_left, bytes_down, bytes_upld);
+
+  free(info_hash);
+  curl_free(e_info_hash);
+  // TODO: free other resources when byte_* will be dynamic
+  return uri;
 }
 
+/*
 static size_t
 write_callback(char *ptr, size_t size, size_t nmemb, char **userdata)
 {
@@ -64,34 +74,45 @@ write_callback(char *ptr, size_t size, size_t nmemb, char **userdata)
   memcpy(*userdata, ptr, size * nmemb);
   return size * nmemb;
 }
+*/
+
+static CURL *
+build_curl_request(struct be_node *dico, char **data)
+{
+  CURL *curl = curl_easy_init();
+  if (!curl)
+    return NULL;
+  char *uri = build_tracker_uri(dico, curl);
+  if (!uri)
+    return NULL;
+
+  curl_easy_setopt(curl, CURLOPT_URL, uri);
+  //curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+  data = data;
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)stdout);
+
+  free(uri);
+
+  return curl;
+}
 
 struct be_node *
 get_peer_list(struct be_node *dico)
 {
-  CURL *curl;
-  printf("puts");
-  debug("Creating request\n");
-  char *req = create_request(dico);
-  char *answer = NULL;
-
-  curl = curl_easy_init();
+  char *data = NULL;
+  CURL *curl = build_curl_request(dico, &data);
   if (!curl)
     return NULL;
 
-  char *request = curl_easy_escape(curl, req, strlen(req));
-  if (!request)
-    return NULL;
-  free(req);
+  CURLcode res = curl_easy_perform(curl);
+  struct be_node *peer_list = NULL;
 
-  curl_easy_setopt(curl, CURLOPT_URL, request);
-  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
-  curl_easy_setopt(curl, CURLOPT_WRITEDATA, &answer);
+  if (res == CURLE_OK)
+  {
+    peer_list = bencode_decode(data);
+    free(data);
+  }
 
-  curl_easy_perform(curl);
-  curl_free(request);
-
-  struct be_node *peer_list = bencode_decode(answer);
-  free(answer);
-
+  curl_easy_cleanup(curl);
   return peer_list;
 }
