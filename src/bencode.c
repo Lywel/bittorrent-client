@@ -92,7 +92,7 @@ bencode_encode(struct be_node *node)
   case BE_INT:
     len = node->val.i;
     len = len ? log10(len < 0 ? -len : len) + (len < 0) : 1;
-    tmp = calloc(len + 3, sizeof(char));
+    tmp = calloc(len + 4, sizeof(char));
     sprintf(tmp, "i%llde", node->val.i);
     return buffer_init(tmp, len + 3);
   case BE_DIC:
@@ -131,6 +131,7 @@ bencode_free_node(struct be_node *node)
       free(node->val.d);
       break;
     case BE_STR:
+      free(node->val.s->str);
       free(node->val.s);
       break;
     default:
