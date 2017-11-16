@@ -2,9 +2,9 @@
 #include <stdlib.h>
 
 unsigned char *
-get_sha1(unsigned char *data)
+compute_sha1(unsigned char *data)
 {
-  unsigned char *hash = malloc(SHA_DIGEST_LENGTH);
+  unsigned char *hash = calloc(SHA_DIGEST_LENGTH + 1, sizeof(char));
   SHA1(data, sizeof(data), hash);
   return hash;
 }
