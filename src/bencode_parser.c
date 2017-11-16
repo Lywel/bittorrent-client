@@ -64,12 +64,10 @@ bencode_parse_str(char **bencode, long long *size)
   bencode_go_until(':', bencode, size);
   long long len = atoll(start);
 
-  char *str = malloc((len + 1) * sizeof(char));
+  char *str = calloc(len + 1, sizeof(char));
   if (str)
-  {
     strncpy(str, *bencode, len);
-    str[len] = 0;
-  }
+
   *bencode += len;
   *size -= len;
 
