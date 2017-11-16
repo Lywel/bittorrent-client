@@ -1,7 +1,16 @@
-#include <openssl/evp.h>
+#include <openssl/sha.h>
 #include <stdlib.h>
 #include "buffer.h"
 
+char *
+compute_sha1(s_buf *info)
+{
+  unsigned char *hash = calloc(20, sizeof(char));
+  SHA1((unsigned char *)info->str, info->len, hash);
+  return (char *)hash;
+}
+
+/*
 void
 compute_sha1(s_buf *info, unsigned char **digest)
 {
@@ -16,3 +25,4 @@ compute_sha1(s_buf *info, unsigned char **digest)
 
   EVP_MD_CTX_destroy(mdctx);
 }
+*/

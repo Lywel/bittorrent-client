@@ -3,6 +3,6 @@
 
 #include "buffer.h"
 
-void compute_sha1(s_buf *info, unsigned char **digest);
+char *compute_sha1(s_buf *info);
 
 #endif
