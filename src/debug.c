@@ -8,7 +8,7 @@ void debug(char *fmt, ...)
 #if DEBUG
   va_list args;
   va_start(args, fmt);
-  fprintf(stderr, fmt, args);
+  vfprintf(stderr, fmt, args);
   va_end(args);
 #endif
 }

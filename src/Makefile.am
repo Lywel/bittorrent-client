@@ -1,5 +1,5 @@
 AM_CFLAGS = -Wall -Wextra -Werror -std=c99 -pedantic
-AM_LDFLAGS = -lcurl -lcrypto
+AM_LDFLAGS = -lcurl -lcrypto -lm
 
 bin_PROGRAMS = my-bittorrent
 my_bittorrent_CPPFLAGS = -I$(srcdir)/include
