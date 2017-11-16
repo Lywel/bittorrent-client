@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include "buffer.h"
 #include "bencode.h"
 #include "bencode_json.h"
 #include "bencode_parser.h"
@@ -21,7 +22,7 @@ bencode_file_decode(char *path)
   if (bencode)
     fread(bencode, sizeof(char), size, f);
   fclose(f);
-  struct be_node *n = bencode_decode(bencode);
+  struct be_node *n = bencode_decode(bencode, size);
   free(bencode);
   return n;
 }
@@ -41,12 +42,12 @@ bencode_encode_dic(struct be_node *dico)
     res = realloc(res, len);
     sprintf(&res[cur], "%lld:", klen);
     cur += log10(klen) + 2;
-    strncpy(res + cur, dico->val.d[i]->key, klen);
+    memcpy(res + cur, dico->val.d[i]->key, klen);
     cur = len - 2;
     char *val = bencode_encode(dico->val.d[i]->val);
     len += strlen(val);
     res = realloc(res, len);
-    strcpy(res + cur, val);
+    memcpy(res + cur, val, strlen(val));
     free(val);
     cur = len - 2;
   }
@@ -68,7 +69,7 @@ bencode_encode_lst(struct be_node *list)
     char *val = bencode_encode(list->val.l[i]);
     len += strlen(val);
     res = realloc(res, len);
-    strcpy(res + cur, val);
+    memcpy(res + cur, val, strlen(val));
     free(val);
     cur = len - 2;
   }
@@ -85,10 +86,10 @@ bencode_encode(struct be_node *node)
   switch (node->type)
   {
   case BE_STR:
-    len = strlen(node->val.s);
+    len = node->val.s->len;
     bencode = calloc(len + log10(len) + 3, sizeof(char));
     sprintf(bencode, "%lld:", len);
-    strcpy(bencode + strlen(bencode), node->val.s);
+    memcpy(bencode + strlen(bencode), node->val.s, len);
     return bencode;
   case BE_INT:
     len = node->val.i;
@@ -104,9 +105,8 @@ bencode_encode(struct be_node *node)
 }
 
 struct be_node *
-bencode_decode(char *bencode)
+bencode_decode(char *bencode, long long len)
 {
-  long long len = strlen(bencode);
   return be_decode(&bencode, &len);
 }
 
