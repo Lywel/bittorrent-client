@@ -60,6 +60,7 @@ build_tracker_uri(struct be_node *dico, CURL *curl)
   sprintf(uri, format,
           urn, peer_id, e_info_hash, port, bytes_left, bytes_down, bytes_upld);
 
+  free(peer_id);
   free(info_hash);
   curl_free(e_info_hash);
   // TODO: free other resources when byte_* will be dynamic
@@ -101,11 +102,14 @@ get_peer_list(struct be_node *dico)
   if (!curl)
     return NULL;
 
+  debug("performming curl request");
   CURLcode res = curl_easy_perform(curl);
+  debug("curl request is resolved with code %d", res);
   struct be_node *peer_list = NULL;
 
   if (res == CURLE_OK)
   {
+    debug("raw answer form server: '%s'", data);
     peer_list = bencode_decode(data);
     free(data);
   }
