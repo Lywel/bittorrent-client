@@ -14,6 +14,11 @@
     [x] Parse lists
     [x] Parse dictionaries
   [x] Dump the tree in JSON
+[x] Encode the bencode
+  [x] Encode strings
+  [x] Encode ints
+  [x] Encode lists
+  [x] Encode dictionaries
 [x] Create the autotools config
 [ ] More advanced autotools config
 [ ] Split he project in modules
