@@ -30,7 +30,7 @@ struct be_node
 };
 
 struct be_node *bencode_file_decode(char *path);
-char *bencode_encode(struct be_node *node);
+s_buf *bencode_encode(struct be_node *node);
 struct be_node *bencode_decode(char *bencode, long long size);
 void bencode_free_node(struct be_node *node);
 int bencode_file_pretty_print(char *path);

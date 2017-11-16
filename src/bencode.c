@@ -27,10 +27,10 @@ bencode_file_decode(char *path)
   return n;
 }
 
-static char *
+static s_buf *
 bencode_encode_dic(struct be_node *dico)
 {
-  long long len = 3;
+  long long len = 2;
   long long cur = 0;
   char *res = calloc(len, sizeof(char));
   res[cur++] = 'd';
@@ -44,59 +44,57 @@ bencode_encode_dic(struct be_node *dico)
     cur += log10(klen) + 2;
     memcpy(res + cur, dico->val.d[i]->key, klen);
     cur = len - 2;
-    char *val = bencode_encode(dico->val.d[i]->val);
-    len += strlen(val);
+    s_buf *val = bencode_encode(dico->val.d[i]->val);
+    len += val->len;
     res = realloc(res, len);
-    memcpy(res + cur, val, strlen(val));
-    free(val);
+    memcpy(res + cur, val->str, val->len);
+    buffer_free(val);
     cur = len - 2;
   }
   res[cur++] = 'e';
-  res[cur] = 0;
-  return res;
+  return buffer_init(res, cur);
 }
 
-static char *
+static s_buf *
 bencode_encode_lst(struct be_node *list)
 {
-  long long len = 3;
+  long long len = 2;
   long long cur = 0;
   char *res = calloc(len, sizeof(char));
   res[cur++] = 'l';
 
   for (long long i = 0; list->val.l[i]; ++i)
   {
-    char *val = bencode_encode(list->val.l[i]);
-    len += strlen(val);
+    s_buf *val = bencode_encode(list->val.l[i]);
+    len += val->len;
     res = realloc(res, len);
-    memcpy(res + cur, val, strlen(val));
-    free(val);
+    memcpy(res + cur, val->str, val->len);
+    buffer_free(val);
     cur = len - 2;
   }
   res[cur++] = 'e';
-  res[cur] = 0;
-  return res;
+  return buffer_init(res, cur);
 }
 
-char *
+s_buf *
 bencode_encode(struct be_node *node)
 {
   long long len = 0;
-  char *bencode = NULL;
+  char *tmp = NULL;
   switch (node->type)
   {
   case BE_STR:
     len = node->val.s->len;
-    bencode = calloc(len + log10(len) + 3, sizeof(char));
-    sprintf(bencode, "%lld:", len);
-    memcpy(bencode + strlen(bencode), node->val.s, len);
-    return bencode;
+    tmp = calloc(len + log10(len) + 2, sizeof(char));
+    sprintf(tmp, "%lld:", len);
+    memcpy(tmp + strlen(tmp), node->val.s->str, len);
+    return buffer_init(tmp, len + log10(len) + 2);
   case BE_INT:
     len = node->val.i;
     len = len ? log10(len < 0 ? -len : len) + (len < 0) : 1;
-    bencode = calloc(len + 4, sizeof(char));
-    sprintf(bencode, "i%llde", node->val.i);
-    return bencode;
+    tmp = calloc(len + 3, sizeof(char));
+    sprintf(tmp, "i%llde", node->val.i);
+    return buffer_init(tmp, len + 3);
   case BE_DIC:
      return bencode_encode_dic(node);
   default:
