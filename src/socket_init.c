@@ -15,14 +15,18 @@
 #define HANSHAKE_S 68
 #define RESERVED_S 8
 
-static struct client *client = NULL;
+struct client client = 
+{
+  0,
+  NULL
+};
 
 uint16_t
 get_port(void)
 {
-  if (!client)
+  if (!client.info)
     return 0;
-  uint16_t port = client->info->sin_port;
+  uint16_t port = client.info->sin_port;
   return ntohs(port);
 }
 
@@ -57,11 +61,9 @@ init_socket(void)
     exit(1);
   }
 
-  struct client *cli = malloc(sizeof(client));
-  cli->socketfd = sock;
-  cli->info = info;
+  client.socketfd = sock;
+  client.info = info;
 
-  client = cli; 
   return sock;
 }
 
@@ -72,7 +74,7 @@ init_socket(void)
 int
 connect_to_peer(struct be_node *peer)
 {
-  if (!client)
+  if (!client.info)
     debug("client not initilized");
 
   char *ip = dico_find_str(peer, "ip");
@@ -84,27 +86,41 @@ connect_to_peer(struct be_node *peer)
     return -1;
   }
 
-  client->info->sin_addr = *(struct in_addr *)peer_sock->h_addr_list[0];
-  connect(client->socketfd, (struct sockaddr *)client, sizeof(struct sockaddr));
+  client.info->sin_addr = *(struct in_addr *)peer_sock->h_addr_list[0];
+  connect(client.socketfd, (struct sockaddr *)&client, sizeof(struct sockaddr));
   return 0;
 }
 
 int
 send_handshake(char *peer_id, char *info_hash)
 {
+  if (!client.info)
+    debug("client not initialized");
+
   char handshake[HANSHAKE_S];
   char reserved[RESERVED_S] = 
   {
     0
   };
+  /* pstrlen */
   handshake[0] = 19;
+  /* pstr */
   strncpy(handshake + 1, "BitTorrent protocol", 19);
+  /* reserved */
   strncpy(handshake + 20, reserved, 8);
+  /* info_hash */
   strncpy(handshake + 28, info_hash, 20);
+  /* peer_id */
   strncpy(handshake + 48, peer_id, 20);
+
+  if (send(client.socketfd, handshake, HANSHAKE_S, 0) < 0)
+  {
+    perror("could not send handshake");
+    return -1;
+  }
+
   return 1;
 }
-
 /*
 int main(void)
 {
