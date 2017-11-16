@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <stdio.h>
+#include <string.h>
 #include <errno.h>
 #include <unistd.h>
 #include <netdb.h>
@@ -10,6 +11,9 @@
 #include "client.h"
 #include "debug.h"
 #include "dico_finder.h"
+
+#define HANSHAKE_S 68
+#define RESERVED_S 8
 
 static struct client *client = NULL;
 
@@ -84,6 +88,23 @@ connect_to_peer(struct be_node *peer)
   connect(client->socketfd, (struct sockaddr *)client, sizeof(struct sockaddr));
   return 0;
 }
+
+int
+send_handshake(char *peer_id, char *info_hash)
+{
+  char handshake[HANSHAKE_S];
+  char reserved[RESERVED_S] = 
+  {
+    0
+  };
+  handshake[0] = 19;
+  strncpy(handshake + 1, "BitTorrent protocol", 19);
+  strncpy(handshake + 20, reserved, 8);
+  strncpy(handshake + 28, info_hash, 20);
+  strncpy(handshake + 48, peer_id, 20);
+  return 1;
+}
+
 /*
 int main(void)
 {

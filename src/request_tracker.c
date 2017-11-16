@@ -11,7 +11,7 @@
 #include "hash.h"
 
 /**
- * 117 beeing the length of peer_id + info_hash + port added to all the
+ * 83 beeing the length of peer_id + info_hash + port added to all the
  * nescessary keywords related to the GET post
 */
 #define C_SIZE 83
