@@ -1,5 +1,6 @@
 #include <openssl/evp.h>
 #include <stdlib.h>
+#include "buffer.h"
 
 void
 compute_sha1(const unsigned char *message, size_t message_len,

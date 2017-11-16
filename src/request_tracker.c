@@ -37,10 +37,11 @@ build_tracker_uri(struct be_node *dico, CURL *curl)
   char *urn = dico_find_str(dico, "announce");
   char *peer_id = generate_peer_id();
 
-  char *pieces = dico_find_str(dico_find(dico, "info"), "pieces");
-  debug("pieces looks like this '%s'", pieces);
+  struct be_node *info_node = dico_find(dico, "info");
+  s_buf *info = bencode_encode(info_node);
+  debug("info bencode: '%s'", info->str);
 
-  unsigned char *info_hash = compute_sha1((unsigned char *)pieces);
+  unsigned char *info_hash = compute_sha1(info);
   char *e_info_hash = curl_easy_escape(curl, (char *)info_hash, 0);
 
   char *port = "6881";
@@ -63,6 +64,7 @@ build_tracker_uri(struct be_node *dico, CURL *curl)
           urn, peer_id, e_info_hash, port, bytes_left, bytes_down, bytes_upld);
 
   free(peer_id);
+  buffer_free(info);
   free(info_hash);
   curl_free(e_info_hash);
   // TODO: free other resources when byte_* will be dynamic
