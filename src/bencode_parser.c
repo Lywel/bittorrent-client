@@ -65,7 +65,6 @@ bencode_parse_str(char **bencode, long long *size)
   char *start = *bencode;
   bencode_go_until(':', bencode, size);
   long long len = atoll(start);
-  debug("parding string of len %lld", len);
 
   char *str = calloc(len + 1, sizeof(char));
   s_buf *buf = buffer_init(str, len);

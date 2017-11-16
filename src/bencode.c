@@ -43,13 +43,13 @@ bencode_encode_dic(struct be_node *dico)
     sprintf(&res[cur], "%lld:", klen);
     cur += log10(klen) + 2;
     memcpy(res + cur, dico->val.d[i]->key, klen);
-    cur = len - 2;
+    cur = len - 1;
     s_buf *val = bencode_encode(dico->val.d[i]->val);
     len += val->len;
     res = realloc(res, len);
     memcpy(res + cur, val->str, val->len);
     buffer_free(val);
-    cur = len - 2;
+    cur = len - 1;
   }
   res[cur++] = 'e';
   return buffer_init(res, cur);
@@ -70,7 +70,7 @@ bencode_encode_lst(struct be_node *list)
     res = realloc(res, len);
     memcpy(res + cur, val->str, val->len);
     buffer_free(val);
-    cur = len - 2;
+    cur = len - 1;
   }
   res[cur++] = 'e';
   return buffer_init(res, cur);
