@@ -7,12 +7,18 @@
 #include <netdb.h>
 #include <netinet/in.h> //check if legit
 #include <arpa/inet.h>
+#include "client.h"
+#include "debug.h"
+#include "dico_finder.h"
 
-static uint16_t port;
+static struct client *client = NULL;
 
 uint16_t
-get_port(int socket)
+get_port(void)
 {
+  if (!client)
+    return 0;
+  uint16_t port = client->info->sin_port;
   return ntohs(port);
 }
 
@@ -22,7 +28,7 @@ get_port(int socket)
 int
 init_socket(void)
 {
-  struct sockaddr_in *client = malloc(sizeof(struct sockaddr_in));
+  struct sockaddr_in *info = malloc(sizeof(struct sockaddr_in));
   int sock = socket(AF_INET, SOCK_STREAM, 0);
 
   if (sock < 0)
@@ -31,18 +37,52 @@ init_socket(void)
     exit(errno);
   }
 
-  client->sin_family = AF_INET;
-  client->sin_addr.s_addr = INADDR_ANY;
+  info->sin_family = AF_INET;
+  info->sin_addr.s_addr = INADDR_ANY;
 
   uint16_t portt = 6881;
-  client->sin_port = htons(portt);
+  info->sin_port = htons(portt);
 
-  for (; bind(sock, (struct sockaddr *)client, sizeof(client)) > 0
-                    && port <= 6889; ++portt)
-    client->sin_port = htons(portt);
+  for (; bind(sock, (struct sockaddr *)info, sizeof(info)) > 0
+                    && portt <= 6889; ++portt)
+    info->sin_port = htons(portt);
+  
+  if (portt > 6889)
+  {
+    perror("Can not use port on range 6881 - 6889.");
+    exit(1);
+  }
 
-  port = client->sin_port;
+  struct client *cli = malloc(sizeof(client));
+  cli->socketfd = sock;
+  cli->info = info;
+
+  client = cli; 
   return sock;
+}
+
+/**
+ * the tracker returns the peers as a list of dic,
+ * here peer should be one of them
+ */
+int
+connect_to_peer(struct be_node *peer)
+{
+  if (!client)
+    debug("client not initilized");
+
+  char *ip = dico_find_str(peer, "ip");
+  struct hostent *peer_sock = gethostbyname(ip);
+
+  if (!peer_sock)
+  {
+    perror("Unknown Host");
+    return -1;
+  }
+
+  client->info->sin_addr = *(struct in_addr *)peer_sock->h_addr_list[0];
+  connect(client->socketfd, (struct sockaddr *)client, sizeof(struct sockaddr));
+  return 0;
 }
 /*
 int main(void)
