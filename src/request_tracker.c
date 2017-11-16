@@ -41,9 +41,8 @@ build_tracker_uri(struct be_node *dico, CURL *curl)
   s_buf *info = bencode_encode(info_node);
   debug("info bencode: '%s'", info->str);
 
-  unsigned char *info_hash = malloc(20);
-  compute_sha1(info, &info_hash);
-  char *e_info_hash = curl_easy_escape(curl, (char *)info_hash, 0);
+  char *info_hash = compute_sha1(info);
+  char *e_info_hash = curl_easy_escape(curl, info_hash, 20);
 
   char *port = "6881";
   char *bytes_left = "0";
