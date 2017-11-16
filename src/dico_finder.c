@@ -13,7 +13,7 @@ dico_find(struct be_node *node, const char *key)
   while (dico[i] && strcmp(dico[i]->key, key))
     ++i;
 
-  return strcmp(key, dico[i]->key) ? NULL : dico[i]->val;
+  return (dico[i] && strcmp(key, dico[i]->key)) ? NULL : dico[i]->val;
 }
 
 char *
