@@ -3,8 +3,7 @@
 #include "buffer.h"
 
 void
-compute_sha1(const unsigned char *message, size_t message_len,
-             unsigned char **digest)
+compute_sha1(s_buf *info, unsigned char **digest)
 {
   EVP_MD_CTX *mdctx;
   unsigned int len = 20;
@@ -12,6 +11,7 @@ compute_sha1(const unsigned char *message, size_t message_len,
   mdctx = EVP_MD_CTX_create();
   EVP_DigestInit_ex(mdctx, EVP_sha1(), NULL);
   *digest = (unsigned char *)OPENSSL_malloc(EVP_MD_size(EVP_sha1()));
+  EVP_DigestUpdate(mdctx, info->str, info->len);
   EVP_DigestFinal_ex(mdctx, *digest, &len);
 
   EVP_MD_CTX_destroy(mdctx);
