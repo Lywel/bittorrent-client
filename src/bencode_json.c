@@ -36,9 +36,9 @@ bencode_dump_json(struct be_node *node)
   {
   case BE_STR:
     printf("\"");
-    for (long long i = 0; node->val.s[i]; ++i)
+    for (long long i = 0; i < node->val.s->len; ++i)
     {
-      unsigned char c = node->val.s[i];
+      unsigned char c = node->val.s->str[i];
       printf((!isprint(c) || c == '"' || c == '\\') ? "\\u00%02x":"%c", c);
     }
     printf("\"");

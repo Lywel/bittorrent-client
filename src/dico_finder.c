@@ -22,7 +22,7 @@ dico_find_str(struct be_node *node, const char *key)
   struct be_node *n = dico_find(node, key);
   if (n->type != BE_STR)
     return NULL;
-  return n ? n->val.s : NULL;
+  return n ? n->val.s->str : NULL;
 }
 
 long long

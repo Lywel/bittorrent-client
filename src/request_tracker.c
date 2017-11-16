@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <curl/curl.h>
 #include <math.h>
+#include "buffer.h"
 #include "bencode.h"
 #include "peer_id.h"
 #include "dico_finder.h"
@@ -37,6 +38,7 @@ build_tracker_uri(struct be_node *dico, CURL *curl)
   char *peer_id = generate_peer_id();
 
   char *pieces = dico_find_str(dico_find(dico, "info"), "pieces");
+  debug("pieces looks like this '%s'", pieces);
 
   unsigned char *info_hash = compute_sha1((unsigned char *)pieces);
   char *e_info_hash = curl_easy_escape(curl, (char *)info_hash, 0);
@@ -68,15 +70,16 @@ build_tracker_uri(struct be_node *dico, CURL *curl)
 }
 
 static size_t
-write_callback(char *ptr, size_t size, size_t nmemb, char **userdata)
+write_callback(char *ptr, size_t size, size_t nmemb, s_buf **userdata)
 {
-  *userdata = calloc(nmemb + 1, size);
-  memcpy(*userdata, ptr, size * nmemb);
+  char *data = calloc(nmemb + 1, size);
+  memcpy(data, ptr, size * nmemb);
+  *userdata = buffer_init(data, size * nmemb);
   return size * nmemb;
 }
 
 static CURL *
-build_curl_request(struct be_node *dico, char **data)
+build_curl_request(struct be_node *dico, s_buf **data)
 {
   CURL *curl = curl_easy_init();
   if (!curl)
@@ -97,7 +100,7 @@ build_curl_request(struct be_node *dico, char **data)
 struct be_node *
 get_peer_list(struct be_node *dico)
 {
-  char *data = NULL;
+  s_buf *data = NULL;
   CURL *curl = build_curl_request(dico, &data);
   if (!curl)
     return NULL;
@@ -110,8 +113,8 @@ get_peer_list(struct be_node *dico)
   if (res == CURLE_OK)
   {
     debug("raw answer form server: '%s'", data);
-    peer_list = bencode_decode(data);
-    free(data);
+    peer_list = bencode_decode(data->str, data->len);
+    buffer_free(data);
   }
 
   curl_easy_cleanup(curl);

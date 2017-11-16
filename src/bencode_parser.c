@@ -1,5 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
+#include "debug.h"
+#include "buffer.h"
 #include "bencode.h"
 #include "bencode_parser.h"
 
@@ -57,21 +59,24 @@ be_decode(char **bencode, long long *size)
   }
 }
 
-char *
+s_buf *
 bencode_parse_str(char **bencode, long long *size)
 {
   char *start = *bencode;
   bencode_go_until(':', bencode, size);
   long long len = atoll(start);
+  debug("parding string of len %lld", len);
 
   char *str = calloc(len + 1, sizeof(char));
-  if (str)
-    strncpy(str, *bencode, len);
+  s_buf *buf = buffer_init(str, len);
+
+  if (str && buf)
+    memcpy(str, *bencode, len);
 
   *bencode += len;
   *size -= len;
 
-  return str;
+  return buf;
 }
 
 long long
@@ -119,7 +124,9 @@ bencode_parse_dic(char **bencode, long long *size)
     nb++;
     dico = realloc(dico, (nb + 1) * sizeof(struct be_dico *));
     dico[nb - 1] = malloc(sizeof(struct be_dico));
-    dico[nb - 1]->key = bencode_parse_str(bencode, size);
+    s_buf *key = bencode_parse_str(bencode, size);
+    dico[nb - 1]->key = key->str;
+    free(key);
     dico[nb - 1]->val = be_decode(bencode, size);
   }
   ++(*bencode);
