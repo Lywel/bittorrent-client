@@ -66,7 +66,6 @@ build_tracker_uri(struct be_node *dico, CURL *curl)
   return uri;
 }
 
-/*
 static size_t
 write_callback(char *ptr, size_t size, size_t nmemb, char **userdata)
 {
@@ -74,7 +73,6 @@ write_callback(char *ptr, size_t size, size_t nmemb, char **userdata)
   memcpy(*userdata, ptr, size * nmemb);
   return size * nmemb;
 }
-*/
 
 static CURL *
 build_curl_request(struct be_node *dico, char **data)
@@ -87,9 +85,8 @@ build_curl_request(struct be_node *dico, char **data)
     return NULL;
 
   curl_easy_setopt(curl, CURLOPT_URL, uri);
-  //curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
-  data = data;
-  curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)stdout);
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, data);
 
   free(uri);
 
