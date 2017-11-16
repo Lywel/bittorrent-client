@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <curl/curl.h>
+#include <math.h>
 #include "bencode.h"
 #include "peer_id.h"
 #include "dico_finder.h"
@@ -15,6 +16,20 @@
 */
 #define C_SIZE 83
 
+static int
+get_file_length(struct be_node *info)
+{
+  int length = dico_find_int(info, "length");
+  if (!length)
+  {
+    struct be_node *files = dico_find(info, "files");
+    if (files)
+      length = dico_find_int(files, "length");
+  }
+
+  return length;
+}
+
 static char *
 create_request(struct be_node *dico)
 {
@@ -24,8 +39,9 @@ create_request(struct be_node *dico)
   struct be_node *info = dico_find(dico, "info");
   unsigned char *pieces = (unsigned char *)dico_find_str(info, "pieces");
   unsigned char *info_hash = get_sha1(pieces);
+
   char *port = "6882";
-  char *bytes_left = "00"; //bytes_left_get();
+  char *bytes_left = "100"; //PLACE HOLDER, SHOULD START WITH FILE SIZE
   char *bytes_dwl = "00"; //bytes_dwl_get();
   char *bytes_upl = "00"; //bytes_upl_get();
   size_t req_len = strlen(peer_id) + strlen(announce)
