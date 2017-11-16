@@ -81,6 +81,7 @@ write_callback(char *ptr, size_t size, size_t nmemb, s_buf **userdata)
 static CURL *
 build_curl_request(struct be_node *dico, s_buf **data)
 {
+  debug("curl initialization");
   CURL *curl = curl_easy_init();
   if (!curl)
     return NULL;
@@ -88,6 +89,7 @@ build_curl_request(struct be_node *dico, s_buf **data)
   if (!uri)
     return NULL;
 
+  debug("curl prepared uri: '%s'", uri);
   curl_easy_setopt(curl, CURLOPT_URL, uri);
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, data);
@@ -112,7 +114,7 @@ get_peer_list(struct be_node *dico)
 
   if (res == CURLE_OK)
   {
-    debug("raw answer form server: '%s'", data);
+    debug("raw answer form server: '%s'", data->str);
     peer_list = bencode_decode(data->str, data->len);
     buffer_free(data);
   }
