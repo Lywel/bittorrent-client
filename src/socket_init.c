@@ -52,7 +52,7 @@ init_socket(void)
   for (; bind(sock, (struct sockaddr *)info, sizeof(info)) > 0
                     && portt <= 6889; ++portt)
     info->sin_port = htons(portt);
-  
+
   if (portt > 6889)
   {
     perror("Can not use port on range 6881 - 6889.");

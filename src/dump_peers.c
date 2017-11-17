@@ -17,12 +17,14 @@ int dump_peers(char *path)
   struct be_node *peers = get_peer_list(torrent);
   if (!peers)
     return -1;
+
   debug("got peer list from server");
-  debug("decoding peer list");
-  decode_peers_ip(dico_find(peers, "peers"));
-  debug("done");
-  bencode_dump_json(peers);
-  putchar('\n');
+  struct be_node *peers_ip = dico_find(peers, "peers");
+  decode_peers_ip(peers_ip);
+
+  for (long long i = 0; peers_ip->val.l[i]; ++i)
+    printf("%s:%lld\n", dico_find_str(peers_ip->val.l[i], "ip"),
+                    dico_find_int(peers_ip->val.l[i], "port"));
 
   bencode_free_node(peers);
   bencode_free_node(torrent);
@@ -32,15 +34,14 @@ int dump_peers(char *path)
 static struct be_node *
 parse_port(char *str)
 {
-  struct be_node *ip = malloc(sizeof(struct be_node));
-  if (ip)
+  struct be_node *port = malloc(sizeof(struct be_node));
+  if (port)
   {
-    ip->type = BE_INT;
-    uint16_t port_net = *str;
-    debug("port: %d", ntohs(port_net));
-    ip->val.i = ntohs(port_net);
+    port->type = BE_INT;
+    uint16_t *port_neto = (uint16_t *)str;
+    port->val.i = ntohs(*port_neto);
   }
-  return ip;
+  return port;
 }
 
 static struct be_node *
@@ -51,10 +52,9 @@ parse_ip(char *str)
   {
     ip->type = BE_STR;
     char *tmp = calloc(16, sizeof(char));
-    debug("ip: %d:%d:%d:%d",
-      (uint8_t)str[0], (uint8_t)str[1],
-      (uint8_t)str[2], (uint8_t)str[3]);
-    sprintf(tmp, "%d:%d:%d:%d",
+    uint32_t *ip_neto = (uint32_t *)str;
+    *ip_neto = ntohl(*ip_neto);
+    sprintf(tmp, "%u.%u.%u.%u",
       (uint8_t)str[0], (uint8_t)str[1],
       (uint8_t)str[2], (uint8_t)str[3]);
     ip->val.s = buffer_init(tmp, strlen(tmp));
@@ -92,6 +92,7 @@ void decode_peers_ip(struct be_node *node)
 {
   if (!node || node->type == BE_LST)
     return;
+  debug("decoding compact peer list");
 
   s_buf *peers = node->val.s;
 
@@ -100,7 +101,7 @@ void decode_peers_ip(struct be_node *node)
     return;
 
   for (long long i = 0; i < peers->len / 6; ++i)
-    res[i] = parse_peer_ip(peers->str + i * 6);
+    res[i] = parse_peer_ip((char *)peers->str + i * 6);
 
   buffer_free(peers);
   node->type = BE_LST;

@@ -40,8 +40,8 @@ build_tracker_uri(struct be_node *dico, CURL *curl)
   char *info_hash = compute_sha1(info);
   char *e_info_hash = curl_easy_escape(curl, info_hash, 20);
 
-  char *port = calloc(5, 1);
-  sprintf(port, "%d", get_port());
+  char *port = calloc(6, 1);
+  sprintf(port, "%u", get_port());
   debug("listening on port %s", port);
 
   char *format = "%s?peer_id=%s&info_hash=%s&port=%s&left=0&downloaded=0&"
