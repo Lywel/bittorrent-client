@@ -1,5 +1,8 @@
 #include <stdlib.h>
+#include <string.h>
+#include <arpa/inet.h>
 #include "request_tracker.h"
+#include "dico_finder.h"
 #include "bencode.h"
 #include "bencode_json.h"
 #include "dump_peers.h"
@@ -15,23 +18,15 @@ int dump_peers(char *path)
   if (!peers)
     return -1;
   debug("got peer list from server");
+  debug("decoding peer list");
+  decode_peers_ip(dico_find(peers, "peers"));
+  debug("done");
   bencode_dump_json(peers);
+  putchar('\n');
+
   bencode_free_node(peers);
   bencode_free_node(torrent);
   return 0;
-}
-
-static struct be_node *
-parse_ip(char *str)
-{
-  struct be_node *ip = malloc(sizeof(struct be_node));
-  if (ip)
-  {
-    ip->type = BE_INT;
-    uint16_t port_net = *((void *)str);
-    ip->val.i = ntohs(port_net);
-  }
-  return ip;
 }
 
 static struct be_node *
@@ -40,10 +35,28 @@ parse_port(char *str)
   struct be_node *ip = malloc(sizeof(struct be_node));
   if (ip)
   {
+    ip->type = BE_INT;
+    uint16_t port_net = *str;
+    debug("port: %d", ntohs(port_net));
+    ip->val.i = ntohs(port_net);
+  }
+  return ip;
+}
+
+static struct be_node *
+parse_ip(char *str)
+{
+  struct be_node *ip = malloc(sizeof(struct be_node));
+  if (ip)
+  {
     ip->type = BE_STR;
-    char *tmp = calloc(16, sizeof(char))
-    sscanf(tmp, "%d:%d:%d:%d",
-      ntohs(str[0]), ntohs(str[1]), ntohs(str[2]), ntohs(str[3]));
+    char *tmp = calloc(16, sizeof(char));
+    debug("ip: %d:%d:%d:%d",
+      (uint8_t)str[0], (uint8_t)str[1],
+      (uint8_t)str[2], (uint8_t)str[3]);
+    sprintf(tmp, "%d:%d:%d:%d",
+      (uint8_t)str[0], (uint8_t)str[1],
+      (uint8_t)str[2], (uint8_t)str[3]);
     ip->val.s = buffer_init(tmp, strlen(tmp));
   }
   return ip;
@@ -64,30 +77,32 @@ parse_peer_ip(char *str)
   peer->val.d[1] = malloc(sizeof(struct be_dico));
   if (!peer->val.d[0] || !peer->val.d[1])
     return NULL;
-  peer->val.d[0]->key = "ip";
+  peer->val.d[0]->key = calloc(3, sizeof(char));
+  strcpy(peer->val.d[0]->key, "ip");
   peer->val.d[0]->val = parse_ip(str);
-  peer->val.d[1]->key = "port";
+  peer->val.d[1]->key = calloc(5, sizeof(char));
+  strcpy(peer->val.d[1]->key, "port");
   peer->val.d[1]->val = parse_port(str + 4);
+  peer->val.d[2] = NULL;
 
   return peer;
 }
 
-void decode_peers_ip(struct be_node **node)
+void decode_peers_ip(struct be_node *node)
 {
-  if (!node || peers->type == BE_LST)
+  if (!node || node->type == BE_LST)
     return;
 
-  s_buf *peers = node->->val.s;
-  struct be_node *res = malloc(sizeof(struct be_node));
+  s_buf *peers = node->val.s;
+
+  struct be_node **res = calloc(peers->len / 6 + 1, sizeof(struct be_node *));
   if (!res)
     return;
 
-  res->type = BE_LST;
-  res->val.l = calloc(peers->len / 6 + 1, sizeof(struct be_node *));
   for (long long i = 0; i < peers->len / 6; ++i)
-    res->val[i] = parse_peer_ip(peers->val + i * 6);
-  res->val[peers->len / 6] = NULL;
+    res[i] = parse_peer_ip(peers->str + i * 6);
 
-  buffer_free(res);
-  *node = res;
+  buffer_free(peers);
+  node->type = BE_LST;
+  node->val.l = res;
 }
