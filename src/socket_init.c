@@ -3,6 +3,7 @@
 #include <sys/socket.h>
 #include <stdio.h>
 #include <string.h>
+#include <strings.h>
 #include <errno.h>
 #include <unistd.h>
 #include <netdb.h>
@@ -77,6 +78,18 @@ connect_to_peer(struct be_node *peer)
 
   char *ip = dico_find_str(peer, "ip");
   struct hostent *peer_sock = gethostbyname(ip);
+  struct sockaddr_in serv_addr;
+
+  bzero((char *) &serv_addr, sizeof(serv_addr));
+  serv_addr.sin_family = AF_INET;
+  bcopy((char *)peer_sock->h_addr_list[0],
+        (char *)&serv_addr.sin_addr.s_addr,
+         peer_sock->h_length);
+
+  serv_addr.sin_port = htons((uint16_t)dico_find_int(peer, "port"));
+
+  debug("Peer port : %d", ntohs(serv_addr.sin_port));
+  debug("Host name : %s", peer_sock->h_name);
 
   if (!peer_sock)
   {
@@ -84,8 +97,9 @@ connect_to_peer(struct be_node *peer)
     return -1;
   }
 
-  client.info->sin_addr = *(struct in_addr *)peer_sock->h_addr_list[0];
-  connect(client.socketfd, (struct sockaddr *)&client,
-                           sizeof(struct sockaddr));
+  if (connect(client.socketfd, (struct sockaddr *)&serv_addr,
+                               sizeof(serv_addr)) < 0)
+    debug("Connection failed");
+
   return 0;
 }

@@ -49,7 +49,7 @@ send_handshake(char *peer_id, char *info_hash)
  * recieved in the handshake
  */
 int
-recieve_handshake(struct be_node *peer)
+recieve_handshake(void)
 {
   if (!client.info)
     debug("client not initialized");
@@ -61,15 +61,7 @@ recieve_handshake(struct be_node *peer)
     return -1;
   }
 
-  debug("handshake: '%s'", handshake);
-
-  if (dico_find_str(peer, "peer_id") &&
-      strncmp(handshake + 48, dico_find_str(peer, "peer_id"), 20) != 0)
-  {
-    debug("peer_id doesn't match with the one recieved from tracker");
-    socket_close();
-    return -1;
-  }
+  debug("handshake: '%*s'", HANSHAKE_S, handshake);
 
   return 1;
 }
