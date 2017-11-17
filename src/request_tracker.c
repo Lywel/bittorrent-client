@@ -12,20 +12,7 @@
 #include "hash.h"
 #include "client.h"
 #include "socket_init.h"
-
-/*static long long
-get_file_length(struct be_node *info)
-{
-  long long length = dico_find_int(info, "length");
-  if (!length)
-  {
-    struct be_node *files = dico_find(info, "files");
-    if (files)
-      length = dico_find_int(files, "length");
-  }
-
-  return length;
-}*/
+#include "decode_binary_peers.h"
 
 static char *
 build_tracker_uri(struct be_node *dico, CURL *curl)
@@ -45,7 +32,7 @@ build_tracker_uri(struct be_node *dico, CURL *curl)
   debug("listening on port %s", port);
 
   char *format = "%s?peer_id=%s&info_hash=%s&port=%s&left=0&downloaded=0&"
-                "uploaded=0&compact=1";
+                 "uploaded=0&compact=1";
 
   long long len = strlen(format) + strlen(urn) + strlen(peer_id)
                   + strlen(e_info_hash) + strlen(port) - 8;
@@ -62,7 +49,6 @@ build_tracker_uri(struct be_node *dico, CURL *curl)
   buffer_free(info);
   free(info_hash);
   curl_free(e_info_hash);
-  // TODO: free other resources when byte_* will be dynamic
   return uri;
 }
 
@@ -118,5 +104,7 @@ get_peer_list(struct be_node *dico)
   }
 
   curl_easy_cleanup(curl);
+
+  decode_binary_peers(dico_find(peer_list, "peers"));
   return peer_list;
 }
