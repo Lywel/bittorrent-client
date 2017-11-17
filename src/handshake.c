@@ -35,7 +35,6 @@ send_handshake(char *peer_id, char *info_hash)
   if (send(client.socketfd, handshake, HANSHAKE_S, 0) < 0)
   {
     perror("could not send handshake");
-    debug("test");
     return -1;
   }
 

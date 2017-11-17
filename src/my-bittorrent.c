@@ -2,10 +2,25 @@
 #include <stdio.h>
 #include "bencode.h"
 #include "dump_peers.h"
+#include "debug.h"
+#include "request_tracker.h"
 
 static int download(char *path)
 {
-  path = path;
+  debug("starting download for %s", path);
+
+  struct be_node *torrent = bencode_file_decode(path);
+  struct be_node *peers = get_peer_list(torrent);
+  peers = peers;
+/*
+  debug("got peer list from server");
+  struct be_node *peers_ip = dico_find(peers, "peers");
+  decode_peers_ip(peers_ip);
+  connect_to_peer(peers_ip->val.l[i]);
+  send_handshake(generate_peer_id(), compute_sha1(bencode_encode(
+                                       dico_find(torrent, "info"))));
+  recieve_handshake(peers_ip->val.l[i]);
+*/
   return 0;
 }
 
