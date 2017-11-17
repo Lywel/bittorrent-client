@@ -3,7 +3,9 @@
 #include <sys/socket.h>
 #include "client.h"
 #include "debug.h"
-
+#include "socket_close.h"
+#include "socket_init.h"
+#include "dico_finder.h"
 #define HANSHAKE_S 68
 #define RESERVED_S 8 
 
@@ -44,7 +46,7 @@ send_handshake(char *peer_id, char *info_hash)
  * recieved in the handshake
  */
 int
-recieve_handshake(char *peer_id)
+recieve_handshake(struct be_node *peer)
 {
   if (!client.info)
     debug("client not initialized");
@@ -56,9 +58,11 @@ recieve_handshake(char *peer_id)
     return -1;
   }
 
-  if (strncmp(handshake + 48, peer_id, 20) != 0)
+  if (dico_find_str(peer, "peer_id") &&
+      strncmp(handshake + 48, dico_find_str(peer, "peer_id"), 20) != 0)
   {
     debug("peer_id doesn't match with the one recieved from tracker");
+    socket_close();
     return -1;
   }
 
