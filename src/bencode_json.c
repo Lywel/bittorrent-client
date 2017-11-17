@@ -11,7 +11,7 @@ list_dump_json(struct be_node **list)
   {
     bencode_dump_json(list[i]);
     if (list[i + 1])
-      printf(",");
+      putchar(',');
   }
 }
 
@@ -23,7 +23,7 @@ dico_dump_json(struct be_dico **dico)
     printf("\"%s\":", dico[i]->key);
     bencode_dump_json(dico[i]->val);
     if (dico[i + 1])
-      printf(",");
+      putchar(',');
   }
 }
 
@@ -35,13 +35,13 @@ bencode_dump_json(struct be_node *node)
   switch (node->type)
   {
   case BE_STR:
-    printf("\"");
+    putchar('"');
     for (long long i = 0; i < node->val.s->len; ++i)
     {
       unsigned char c = node->val.s->str[i];
       printf((!isprint(c) || c == '"' || c == '\\') ? "\\u00%02x":"%c", c);
     }
-    printf("\"");
+    putchar('"');
     break;
   case BE_INT:
     printf("%lld", node->val.i);
