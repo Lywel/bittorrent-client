@@ -12,6 +12,7 @@
 int
 send_handshake(char *peer_id, char *info_hash)
 {
+  debug("building handshake");
   if (!client.info)
     debug("client not initialized");
 
@@ -34,9 +35,11 @@ send_handshake(char *peer_id, char *info_hash)
   if (send(client.socketfd, handshake, HANSHAKE_S, 0) < 0)
   {
     perror("could not send handshake");
+    debug("test");
     return -1;
   }
 
+  debug("handshaked sent: '%s'", handshake);
   return 1;
 }
 
@@ -57,6 +60,8 @@ recieve_handshake(struct be_node *peer)
     perror("could not recieve handshake");
     return -1;
   }
+
+  debug("handshake: '%s'", handshake);
 
   if (dico_find_str(peer, "peer_id") &&
       strncmp(handshake + 48, dico_find_str(peer, "peer_id"), 20) != 0)

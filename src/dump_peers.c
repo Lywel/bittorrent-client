@@ -7,6 +7,10 @@
 #include "bencode_json.h"
 #include "dump_peers.h"
 #include "debug.h"
+#include "socket_init.h"
+#include "handshake.h"
+#include "peer_id.h"
+#include "hash.h"
 
 int dump_peers(char *path)
 {
@@ -22,9 +26,19 @@ int dump_peers(char *path)
   struct be_node *peers_ip = dico_find(peers, "peers");
   decode_peers_ip(peers_ip);
 
+
   for (long long i = 0; peers_ip->val.l[i]; ++i)
+  {
     printf("%s:%lld\n", dico_find_str(peers_ip->val.l[i], "ip"),
                     dico_find_int(peers_ip->val.l[i], "port"));
+    if(!connect_to_peer(peers_ip->val.l[i]))
+    {
+      debug("conection succeed");
+      send_handshake(generate_peer_id(), compute_sha1(bencode_encode(
+                                       dico_find(torrent, "info"))));
+      recieve_handshake(peers_ip->val.l[i]);
+    }
+  }
 
   bencode_free_node(peers);
   bencode_free_node(torrent);
