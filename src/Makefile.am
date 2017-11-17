@@ -14,4 +14,7 @@ my_bittorrent_SOURCES = \
   peer_id.c \
   dump_peers.c \
   my-bittorrent.c \
-  hash.c
+  hash.c \
+  socket_init.c \
+  socket_close.c \
+  handshake.c

@@ -6,9 +6,10 @@
 #include <errno.h>
 #include <unistd.h>
 #include <netdb.h>
-#include <netinet/in.h> //check if legit
+#include <netinet/in.h>
 #include <arpa/inet.h>
 #include "client.h"
+#include "socket_init.h"
 #include "debug.h"
 #include "dico_finder.h"
 
@@ -39,7 +40,7 @@ init_socket(void)
   if (sock < 0)
   {
     perror("Can not initialize socket.");
-    exit(errno);
+    return -1;
   }
 
   info->sin_family = AF_INET;

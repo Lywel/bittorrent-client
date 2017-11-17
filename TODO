@@ -30,3 +30,7 @@
   [ ] close : socket in init_socket
 [ ] Create the debug function for the mandatory logs
 [x] Rename get_sha1 to compute_sha1()
+[ ] handle verbose option
+  [ ] tracker request
+  [ ] peer connection/disconnection
+  [ ] peer messages

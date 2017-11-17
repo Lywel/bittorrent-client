@@ -10,12 +10,8 @@
 #include "request_tracker.h"
 #include "debug.h"
 #include "hash.h"
-
-/**
- * 83 beeing the length of peer_id + info_hash + port added to all the
- * nescessary keywords related to the GET post
-*/
-#define C_SIZE 83
+#include "client.h"
+#include "socket_init.h"
 
 /*static long long
 get_file_length(struct be_node *info)
@@ -44,25 +40,24 @@ build_tracker_uri(struct be_node *dico, CURL *curl)
   char *info_hash = compute_sha1(info);
   char *e_info_hash = curl_easy_escape(curl, info_hash, 20);
 
-  char *port = "6881";
-  char *bytes_left = "0";
-  char *bytes_down = "0";
-  char *bytes_upld  = "0";
+  char *port = calloc(5, 1);
+  sprintf(port, "%d", get_port());
+  debug("listening on port %s", port);
 
-  char *format = "%s?peer_id=%s&info_hash=%s&port=%s&left=%s&downloaded=%s&"
-                "uploaded=%s&compact=1";
+  char *format = "%s?peer_id=%s&info_hash=%s&port=%s&left=0&downloaded=0&"
+                "uploaded=0&compact=1";
 
-  long long len = strlen(urn) + strlen(peer_id) + strlen(e_info_hash) + strlen(port)
-                + strlen(bytes_left) + strlen(bytes_down) + strlen(bytes_upld)
-                + strlen(format) - 12 + 1; // -12 for %s in format + 1 for \0
+  long long len = strlen(format) + strlen(urn) + strlen(peer_id)
+                  + strlen(e_info_hash) + strlen(port) - 8;
 
   char *uri = calloc(len, sizeof(char));
   if (!uri)
     return NULL;
 
   sprintf(uri, format,
-          urn, peer_id, e_info_hash, port, bytes_left, bytes_down, bytes_upld);
+          urn, peer_id, e_info_hash, port);
 
+  free(port);
   free(peer_id);
   buffer_free(info);
   free(info_hash);
@@ -85,8 +80,9 @@ build_curl_request(struct be_node *dico, s_buf **data)
 {
   debug("curl initialization");
   CURL *curl = curl_easy_init();
-  if (!curl)
+  if (!curl || init_socket() < 0)
     return NULL;
+
   char *uri = build_tracker_uri(dico, curl);
   if (!uri)
     return NULL;
