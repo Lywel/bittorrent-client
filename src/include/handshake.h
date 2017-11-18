@@ -1,7 +1,8 @@
 #ifndef HANDSHAKE_H
 # define HANDSHAKE_H
+# include "client.h"
 
-int send_handshake(char *peer_id, char *info_hash);
-int recieve_handshake(struct be_node *peer);
+int send_handshake(struct peer *peer);
+int recieve_handshake(struct peer *peer);
 
 #endif

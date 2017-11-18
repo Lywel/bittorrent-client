@@ -3,10 +3,10 @@
 #include <unistd.h>
 
 void
-socket_close(void)
+socket_close(struct peer *peer)
 {
-  if (close(client.socketfd) < 0)
+  if (close(peer->sfd) < 0)
     perror("can't close socket.");
 
-  free(client.info);
+  free(peer->info);
 }

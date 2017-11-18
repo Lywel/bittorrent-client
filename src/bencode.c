@@ -145,8 +145,6 @@ bencode_free_node(struct be_node *node)
 int
 bencode_file_pretty_print()
 {
-  struct be_node *node = bencode_file_decode(g_bt.path);
-  bencode_dump_json(node);
-  bencode_free_node(node);
+  bencode_dump_json(g_bt.torrent);
   return 0;
 }

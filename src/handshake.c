@@ -6,18 +6,22 @@
 #include "socket_close.h"
 #include "socket_init.h"
 #include "dico_finder.h"
+
 #define HANSHAKE_S 68
-#define RESERVED_S 8 
+#define RESERVED_S 8
 
 int
-send_handshake(char *peer_id, char *info_hash)
+send_handshake(struct peer *peer)
 {
   debug("building handshake");
-  if (!client.info)
+  if (!peer->info)
+  {
     debug("client not initialized");
+    return -1;
+  }
 
   char handshake[HANSHAKE_S];
-  char reserved[RESERVED_S] = 
+  char reserved[RESERVED_S] =
   {
     0
   };
@@ -28,18 +32,18 @@ send_handshake(char *peer_id, char *info_hash)
   /* reserved */
   strncpy(handshake + 20, reserved, 8);
   /* info_hash */
-  strncpy(handshake + 28, info_hash, 20);
+  strncpy(handshake + 28, g_bt.info_hash, 20);
   /* peer_id */
-  strncpy(handshake + 48, peer_id, 20);
+  strncpy(handshake + 48, g_bt.peer_id, 20);
 
-  if (send(client.socketfd, handshake, HANSHAKE_S, 0) < 0)
+  if (send(peer->sfd, handshake, HANSHAKE_S, 0) < 0)
   {
     perror("could not send handshake");
     return -1;
   }
 
   debug("handshaked sent: '%s'", handshake);
-  return 1;
+  return 0;
 }
 
 /**
@@ -48,19 +52,21 @@ send_handshake(char *peer_id, char *info_hash)
  * recieved in the handshake
  */
 int
-recieve_handshake(void)
+recieve_handshake(struct peer *peer)
 {
-  if (!client.info)
+  if (!peer->info)
+  {
     debug("client not initialized");
-  
+    return -1;
+  }
+
   char handshake[HANSHAKE_S];
-  if (recv(client.socketfd, handshake, HANSHAKE_S, 0) < 0)
+  if (recv(peer->sfd, handshake, HANSHAKE_S, 0) < 0)
   {
     perror("could not recieve handshake");
     return -1;
   }
 
   debug("handshake: '%*s'", HANSHAKE_S, handshake);
-
-  return 1;
+  return 0;
 }

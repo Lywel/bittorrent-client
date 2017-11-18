@@ -18,22 +18,17 @@ build_tracker_uri(struct be_node *dico, CURL *curl)
   char *urn = dico_find_str(dico, "announce");
   char *e_info_hash = curl_easy_escape(curl, g_bt.info_hash, 20);
 
-  char *port = calloc(6, sizeof(char));
-  sprintf(port, "%u", get_port());
-
-  debug("listening on port %s", port);
-
-  char *format = "%s?peer_id=%s&info_hash=%s&port=%s&left=0&downloaded=0&"
+  debug("listening on port %u", g_bt.port);
+  char *format = "%s?peer_id=%s&info_hash=%s&port=%u&left=0&downloaded=0&"
                  "uploaded=0&compact=1";
 
-  long long len = strlen(format) + strlen(urn) + strlen(port) + 36;
+  long long len = strlen(format) + strlen(urn) + 41;
   char *uri = calloc(len, sizeof(char));
   if (!uri)
     return NULL;
 
-  sprintf(uri, format, urn, g_bt.peer_id, e_info_hash, port);
+  sprintf(uri, format, urn, g_bt.peer_id, e_info_hash, g_bt.port);
 
-  free(port);
   curl_free(e_info_hash);
   return uri;
 }
@@ -52,7 +47,7 @@ build_curl_request(struct be_node *dico, s_buf **data)
 {
   debug("curl initialization");
   CURL *curl = curl_easy_init();
-  if (!curl || init_socket() < 0)
+  if (!curl)
     return NULL;
 
   char *uri = build_tracker_uri(dico, curl);
@@ -92,6 +87,8 @@ get_peer_list(struct be_node *dico)
   }
   curl_easy_cleanup(curl);
 
-  decode_binary_peers(dico_find(peer_list, "peers"));
+  struct be_node *peers = dico_find(peer_list, "peers");
+  decode_binary_peers(peers);
+  peer_list_init(peers);
   return peer_list;
 }

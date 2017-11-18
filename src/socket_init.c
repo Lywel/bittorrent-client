@@ -14,26 +14,11 @@
 #include "debug.h"
 #include "dico_finder.h"
 
-struct client client = 
-{
-  0,
-  NULL
-};
-
-uint16_t
-get_port(void)
-{
-  if (!client.info)
-    return 0;
-  uint16_t port = client.info->sin_port;
-  return ntohs(port);
-}
-
 /**
  * init a new socket and returns its file descriptor
  */
 int
-init_socket(void)
+peer_socket_init(struct peer *peer)
 {
   struct sockaddr_in *info = malloc(sizeof(struct sockaddr_in));
   int sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -47,23 +32,22 @@ init_socket(void)
   info->sin_family = AF_INET;
   info->sin_addr.s_addr = INADDR_ANY;
 
-  uint16_t portt = 6881;
-  info->sin_port = htons(portt);
+  uint16_t port = 6881;
+  info->sin_port = htons(port);
 
   for (; bind(sock, (struct sockaddr *)info, sizeof(info)) > 0
-                    && portt <= 6889; ++portt)
-    info->sin_port = htons(portt);
+                    && port <= 6890; ++port)
+    info->sin_port = htons(port);
 
-  if (portt > 6889)
+  if (port > 6889)
   {
     perror("Can not use port on range 6881 - 6889.");
-    exit(1);
+    return -1;
   }
 
-  client.socketfd = sock;
-  client.info = info;
-
-  return sock;
+  peer->sfd = sock;
+  peer->info = info;
+  return 0;
 }
 
 /**
@@ -71,13 +55,15 @@ init_socket(void)
  * here peer should be one of them
  */
 int
-connect_to_peer(struct be_node *peer)
+peer_connect(struct peer *peer)
 {
-  if (!client.info)
+  if (!peer->info)
+  {
     debug("client not initilized");
+    return -1;
+  }
 
-  char *ip = dico_find_str(peer, "ip");
-  struct hostent *peer_sock = gethostbyname(ip);
+  struct hostent *peer_sock = gethostbyname(peer->ip);
   struct sockaddr_in serv_addr;
 
   bzero((char *) &serv_addr, sizeof(serv_addr));
@@ -86,7 +72,7 @@ connect_to_peer(struct be_node *peer)
         (char *)&serv_addr.sin_addr.s_addr,
          peer_sock->h_length);
 
-  serv_addr.sin_port = htons((uint16_t)dico_find_int(peer, "port"));
+  serv_addr.sin_port = htons(peer->port);
 
   debug("Peer port : %d", ntohs(serv_addr.sin_port));
   debug("Host name : %s", peer_sock->h_name);
@@ -97,9 +83,12 @@ connect_to_peer(struct be_node *peer)
     return -1;
   }
 
-  if (connect(client.socketfd, (struct sockaddr *)&serv_addr,
-                               sizeof(serv_addr)) < 0)
+  if (connect(peer->sfd,
+             (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
+  {
     debug("Connection failed");
+    return -1;
+  }
 
   return 0;
 }

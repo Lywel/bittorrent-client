@@ -16,15 +16,12 @@ static int download()
 {
   debug("starting download for %s", g_bt.path);
 
-  struct be_node *peers = get_peer_list(g_bt.dico);
+  get_peer_list(g_bt.torrent);
   debug("got peer list from server");
 
-  struct be_node *peers_ip = dico_find(peers, "peers");
-
-  connect_to_peer(peers_ip->val.l[0]);
-  send_handshake(g_bt.peer_id, g_bt.info_hash);
-  recieve_handshake(peers_ip->val.l[0]);
-  recieve_message();
+  peer_connect(g_bt.peers[0]);
+  send_handshake(g_bt.peers[0]);
+  recieve_handshake(g_bt.peers[0]);
   return 0;
 }
 
