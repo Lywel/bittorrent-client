@@ -60,3 +60,9 @@ handle_message(struct message mess)
     break;
   }
 }
+
+/*void
+handle_bitfield(struct message mess)
+{
+  for (int i = 0)
+}*/
