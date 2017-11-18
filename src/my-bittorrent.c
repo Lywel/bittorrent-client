@@ -39,6 +39,7 @@ static int
 parse_args(int argc, char **argv)
 {
   char action = 0;
+  g_bt.verbose = 0;
 
   while (--argc > 0)
   {

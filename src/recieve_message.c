@@ -26,18 +26,15 @@ handle_bitfield(struct message mess)
     char cur = mess.payload[i];
     char have = pieces[i];
 
-    while (cur)
+    for (char i = 7; i >= 0; --i)
     {
-      if (!(have & 1) && (cur & 1))
+      if (!(have & (1 << i)) && (cur & (1 << i)))
       {
         debug("I am interrested in piece nb %u", index);
         return index;
       }
       index++;
     }
-
-    have >>= 1;
-    cur >>= 1;
   }
 
   return index;
@@ -88,9 +85,12 @@ recieve_message(struct peer *p)
 
   uint32_t length = get_len(mess);
 
-  debug("length %d", length);
+  debug("length %u", length);
   debug("message id %u", mess.id);
-  debug("payload %s", mess.payload);
+  debug("payload :");
+  for (unsigned long i = 0; i < length; ++i)
+    printf("%x ", mess.payload[i]);
+  putchar('\n');
 
   handle_message(mess);
   return 1;

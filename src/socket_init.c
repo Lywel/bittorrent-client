@@ -89,6 +89,9 @@ peer_connect(struct peer *peer)
     debug("Connection failed");
     return -1;
   }
+  verbose("%x%x%x: peers: connect: %s:%u\n", (uint8_t)g_bt.info_hash[0],
+    (uint8_t)g_bt.info_hash[1], (uint8_t)g_bt.info_hash[2],
+    peer->ip, peer->port);
 
   return 0;
 }
