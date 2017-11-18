@@ -16,6 +16,7 @@ struct bittorent
 {
   char verbose;
   char *path;
+  char *pieces;
   struct be_node *torrent;
   struct peer **peers;
   char *info_hash;
@@ -23,7 +24,7 @@ struct bittorent
   uint16_t port;
 };
 
-struct bittorent g_bt;
+extern struct bittorent g_bt;
 
 void client_init(void);
 

@@ -4,6 +4,7 @@
 #include "dump_peers.h"
 #include "debug.h"
 #include "request_tracker.h"
+#include "recieve_message.h"
 #include "handshake.h"
 #include "dico_finder.h"
 #include "socket_init.h"

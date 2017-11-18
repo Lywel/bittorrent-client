@@ -34,6 +34,6 @@
   [ ] tracker request
   [ ] peer connection/disconnection
   [ ] peer messages
+[ ] getname for dump peers
 [ ] Create the global structure
 [ ] Create the download loop
-
