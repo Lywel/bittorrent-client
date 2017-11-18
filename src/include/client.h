@@ -17,9 +17,10 @@ struct bittorent
   struct be_node *dico;
   char *info_hash;
   struct peer **peers;
+  char *pieces;
 };
 
-struct bittorent g_bt;
+extern struct bittorent g_bt;
 
 void client_init(void);
 

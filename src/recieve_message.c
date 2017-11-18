@@ -56,13 +56,31 @@ handle_message(struct message mess)
     debug("recieved have message");
     break;
   case 5:
-    debug("recieved bitfield");
+    handle_bitfield(mess);
     break;
   }
 }
 
-/*void
+void
 handle_bitfield(struct message mess)
 {
-  for (int i = 0)
-}*/
+  char *pieces = g_bt.pieces;
+  for (size_t i = 0; i < mess.len; ++i)
+  {
+    char cur = mess.payload[i];
+    while (cur)
+    {
+      for (size_t j = 0; j < mess.len; ++j)
+      {
+        char have = pieces[j];
+        while (have)
+        {
+          if (!(have & 1) && (cur & 1))
+            debug("I am interrested");
+        }
+        have >>= 1;
+      }
+      cur >>= 1;
+    }
+  }
+}

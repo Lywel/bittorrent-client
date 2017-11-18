@@ -5,5 +5,6 @@
 
 int recieve_message(void);
 void handle_message(struct message mess);
+void handle_bitfield(struct message mess);
 
 #endif
