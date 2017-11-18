@@ -66,9 +66,9 @@ parse_peer_ip(char *str)
 void
 peer_list_init(struct be_node *node)
 {
-  if (!node || node->type == BE_LST)
+  if (!node || node->type != BE_LST)
     return;
-  debug("init peers list socket");
+  debug("peer list init");
   g_bt.peers = NULL;
 
   long long i;
