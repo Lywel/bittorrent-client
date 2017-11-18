@@ -18,7 +18,7 @@ client_init(void)
   g_bt.torrent = bencode_file_decode(g_bt.path);
 
   // Keeping track of downloaded pieces
-  int pieces_nb = dico_find(g_bt.torrent, "pieces")->val.s->len / 20;
+  int pieces_nb = dico_find(dico_find(g_bt.torrent, "info"), "pieces")->val.s->len / 20;
   int bytes = pieces_nb / 8 + pieces_nb % 8 != 0;
   char *pieces = calloc(bytes, 1);
   g_bt.pieces = pieces;
