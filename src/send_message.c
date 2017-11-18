@@ -23,7 +23,7 @@ send_message(void *message, size_t len, struct peer *p)
     perror("could not send message");
     return -1;
   }
-  return 0;  
+  return 0;
 }
 
 int
@@ -46,6 +46,7 @@ get_message(enum type type)
 {
   uint32_t len;
   struct message mess;
+  mess.payload = NULL;
   switch (type)
   {
     case INTERESTED:
@@ -59,7 +60,7 @@ get_message(enum type type)
   }
   return mess;
 }
- 
+
 int
 send_message_type(enum type type, struct peer *p)
 {
