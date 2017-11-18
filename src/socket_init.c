@@ -14,20 +14,11 @@
 #include "debug.h"
 #include "dico_finder.h"
 
-uint16_t
-get_port(void)
-{
-  if (!client.info)
-    return 0;
-  uint16_t port = client.info->sin_port;
-  return ntohs(port);
-}
-
 /**
  * init a new socket and returns its file descriptor
  */
-void
-init_peer_socket(struct peer *peer)
+int
+peer_socket_init(struct peer *peer)
 {
   struct sockaddr_in *info = malloc(sizeof(struct sockaddr_in));
   int sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -42,17 +33,21 @@ init_peer_socket(struct peer *peer)
   info->sin_addr.s_addr = INADDR_ANY;
 
   uint16_t port = 6881;
-  info->sin_port = htons(portt);
+  info->sin_port = htons(port);
 
   for (; bind(sock, (struct sockaddr *)info, sizeof(info)) > 0
                     && port <= 6890; ++port)
     info->sin_port = htons(port);
 
   if (port > 6889)
+  {
     perror("Can not use port on range 6881 - 6889.");
+    return -1;
+  }
 
   peer->sfd = sock;
   peer->info = info;
+  return 0;
 }
 
 /**
@@ -60,7 +55,7 @@ init_peer_socket(struct peer *peer)
  * here peer should be one of them
  */
 int
-connect_to_peer(struct peer *peer)
+peer_connect(struct peer *peer)
 {
   if (!peer->info)
   {
@@ -88,7 +83,8 @@ connect_to_peer(struct peer *peer)
     return -1;
   }
 
-  if (connect(peer->sfd, &serv_addr, sizeof(serv_addr)) < 0)
+  if (connect(peer->sfd,
+             (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
   {
     debug("Connection failed");
     return -1;

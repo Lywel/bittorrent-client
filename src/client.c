@@ -1,9 +1,9 @@
-#include "my-bittorent.h"
 #include "buffer.h"
 #include "peer_id.h"
 #include "bencode.h"
 #include "hash.h"
 #include "client.h"
+#include "dico_finder.h"
 
 void
 client_init(void)

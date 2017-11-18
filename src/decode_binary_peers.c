@@ -62,6 +62,12 @@ parse_peer_ip(char *str)
 }
 
 void
+peer_list_init(struct be_node *node)
+{
+  node = node;
+}
+
+void
 decode_binary_peers(struct be_node *node)
 {
   if (!node || node->type == BE_LST)

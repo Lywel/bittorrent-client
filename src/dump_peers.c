@@ -10,7 +10,7 @@
 int dump_peers()
 {
   debug("dumping peers for: '%s'", g_bt.path);
-  struct be_node *peers = dico_find(get_peer_list(g_bt.dico), "peers");
+  struct be_node *peers = dico_find(get_peer_list(g_bt.torrent), "peers");
 
   debug("got peer list from server");
 

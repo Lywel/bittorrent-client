@@ -32,11 +32,11 @@ send_handshake(struct peer *peer)
   /* reserved */
   strncpy(handshake + 20, reserved, 8);
   /* info_hash */
-  strncpy(handshake + 28, info_hash, 20);
+  strncpy(handshake + 28, g_bt.info_hash, 20);
   /* peer_id */
-  strncpy(handshake + 48, peer_id, 20);
+  strncpy(handshake + 48, g_bt.peer_id, 20);
 
-  if (send(peer.sfd, handshake, HANSHAKE_S, 0) < 0)
+  if (send(peer->sfd, handshake, HANSHAKE_S, 0) < 0)
   {
     perror("could not send handshake");
     return -1;

@@ -1,22 +1,26 @@
 #ifndef CLIENT_H
 # define CLIENT_H
 
-#include "bencode.h"
+# include <stdint.h>
+# include "bencode.h"
 
-struct client
+struct peer
 {
-  int socketfd;
+  int sfd;
   struct sockaddr_in *info;
+  char *ip;
+  uint16_t port;
 };
 
 struct bittorent
 {
-  char *path;
   char verbose;
-  char *peer_id;
-  struct be_node *dico;
-  char *info_hash;
+  char *path;
+  struct be_node *torrent;
   struct peer **peers;
+  char *info_hash;
+  char *peer_id;
+  uint16_t port;
 };
 
 struct bittorent g_bt;
