@@ -42,7 +42,7 @@ handle_bitfield(struct message mess)
 
   return index;
 }
- 
+
 static void
 handle_message(struct message mess)
 {
@@ -74,7 +74,7 @@ handle_message(struct message mess)
     break;
   }
 }
- 
+
 int
 recieve_message(struct peer *p)
 {
