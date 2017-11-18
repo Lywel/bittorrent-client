@@ -20,4 +20,5 @@ my_bittorrent_SOURCES = \
   handshake.c \
   decode_binary_peers.c \
   recieve_message.c \
-  client.c
+  client.c \
+  send_message.c

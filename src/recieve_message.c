@@ -6,6 +6,7 @@
 #include "client.h"
 #include "debug.h"
 #include "recieve_message.h"
+#include "send_message.h"
 
 static uint32_t
 get_len(struct message mess)
@@ -19,7 +20,7 @@ static size_t
 handle_bitfield(struct message mess)
 {
   char *pieces = g_bt.pieces;
-  size_t index = 0;
+  size_t index = -1;
 
   for (size_t i = 0; i < get_len(mess); ++i)
   {
@@ -30,8 +31,8 @@ handle_bitfield(struct message mess)
     {
       if (!(have & 1) && (cur & 1))
       {
-        debug("I am interrested in piece nb %u", index);
-        return index;
+        debug("I am interrested in piece nb %u", index + 1);
+        return index + 1;
       }
       index++;
     }
@@ -44,7 +45,7 @@ handle_bitfield(struct message mess)
 }
 
 static void
-handle_message(struct message mess)
+handle_message(struct message mess, struct peer *p)
 {
   if (mess.len == 0)
   {
@@ -52,6 +53,7 @@ handle_message(struct message mess)
     return;
   }
 
+  int i;
   switch(mess.id)
   {
   case 0:
@@ -70,7 +72,11 @@ handle_message(struct message mess)
     debug("recieved have message");
     break;
   case 5:
-    handle_bitfield(mess);
+    if ((i = handle_bitfield(mess)) != -1)
+      send_message_type(INTERESTED, p);
+    break;
+  case 7:
+    debug("recieved piece");
     break;
   }
 }
@@ -92,6 +98,6 @@ recieve_message(struct peer *p)
   debug("message id %u", mess.id);
   debug("payload %s", mess.payload);
 
-  handle_message(mess);
+  handle_message(mess, p);
   return 1;
 }

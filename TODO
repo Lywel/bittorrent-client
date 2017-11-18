@@ -37,3 +37,4 @@
 [ ] getname for dump peers
 [ ] Create the global structure
 [ ] Create the download loop
+[ ] set socket timout https://stackoverflow.com/questions/4181784/how-to-set-socket-timeout-in-c-when-making-multiple-connections
