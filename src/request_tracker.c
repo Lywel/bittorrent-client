@@ -5,49 +5,35 @@
 #include <math.h>
 #include "buffer.h"
 #include "bencode.h"
-#include "peer_id.h"
 #include "dico_finder.h"
 #include "request_tracker.h"
 #include "debug.h"
-#include "hash.h"
-#include "client.h"
-#include "socket_init.h"
 #include "decode_binary_peers.h"
+#include "socket_init.h"
+#include "client.h"
 
 static char *
 build_tracker_uri(struct be_node *dico, CURL *curl)
 {
   char *urn = dico_find_str(dico, "announce");
-  char *peer_id = generate_peer_id();
+  char *e_info_hash = curl_easy_escape(curl, g_bt.info_hash, 20);
 
-  struct be_node *info_node = dico_find(dico, "info");
-  s_buf *info = bencode_encode(info_node);
-  debug("info bencode: '%s'", info->str);
-
-  char *info_hash = compute_sha1(info);
-  char *e_info_hash = curl_easy_escape(curl, info_hash, 20);
-
-  char *port = calloc(6, 1);
+  char *port = calloc(6, sizeof(char));
   sprintf(port, "%u", get_port());
+
   debug("listening on port %s", port);
 
   char *format = "%s?peer_id=%s&info_hash=%s&port=%s&left=0&downloaded=0&"
                  "uploaded=0&compact=1";
 
-  long long len = strlen(format) + strlen(urn) + strlen(peer_id)
-                  + strlen(e_info_hash) + strlen(port) - 8;
-
+  long long len = strlen(format) + strlen(urn) + strlen(port) + 36;
   char *uri = calloc(len, sizeof(char));
   if (!uri)
     return NULL;
 
-  sprintf(uri, format,
-          urn, peer_id, e_info_hash, port);
+  sprintf(uri, format, urn, g_bt.peer_id, e_info_hash, port);
 
   free(port);
-  free(peer_id);
-  buffer_free(info);
-  free(info_hash);
   curl_free(e_info_hash);
   return uri;
 }
@@ -87,14 +73,16 @@ struct be_node *
 get_peer_list(struct be_node *dico)
 {
   s_buf *data = NULL;
+  struct be_node *peer_list = NULL;
+
   CURL *curl = build_curl_request(dico, &data);
   if (!curl)
     return NULL;
 
   debug("performming curl request");
+
   CURLcode res = curl_easy_perform(curl);
   debug("curl request is resolved with code %d", res);
-  struct be_node *peer_list = NULL;
 
   if (res == CURLE_OK)
   {
@@ -102,7 +90,6 @@ get_peer_list(struct be_node *dico)
     peer_list = bencode_decode(data->str, data->len);
     buffer_free(data);
   }
-
   curl_easy_cleanup(curl);
 
   decode_binary_peers(dico_find(peer_list, "peers"));

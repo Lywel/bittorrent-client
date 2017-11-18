@@ -3,6 +3,7 @@
 #include <string.h>
 #include <math.h>
 #include "buffer.h"
+#include "client.h"
 #include "bencode.h"
 #include "bencode_json.h"
 #include "bencode_parser.h"
@@ -142,9 +143,9 @@ bencode_free_node(struct be_node *node)
 }
 
 int
-bencode_file_pretty_print(char *path)
+bencode_file_pretty_print()
 {
-  struct be_node *node = bencode_file_decode(path);
+  struct be_node *node = bencode_file_decode(g_bt.path);
   bencode_dump_json(node);
   bencode_free_node(node);
   return 0;

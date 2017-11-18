@@ -3,20 +3,14 @@
 #include <arpa/inet.h>
 #include "request_tracker.h"
 #include "dico_finder.h"
-#include "bencode.h"
-#include "bencode_json.h"
 #include "dump_peers.h"
+#include "client.h"
 #include "debug.h"
-#include "socket_init.h"
-#include "handshake.h"
-#include "peer_id.h"
-#include "hash.h"
 
-int dump_peers(char *path)
+int dump_peers()
 {
-  debug("dumping peers for: '%s'", path);
-  struct be_node *torrent = bencode_file_decode(path);
-  struct be_node *peers = dico_find(get_peer_list(torrent), "peers");
+  debug("dumping peers for: '%s'", g_bt.path);
+  struct be_node *peers = dico_find(get_peer_list(g_bt.dico), "peers");
 
   debug("got peer list from server");
 
@@ -25,6 +19,5 @@ int dump_peers(char *path)
                     dico_find_int(peers->val.l[i], "port"));
 
   bencode_free_node(peers);
-  bencode_free_node(torrent);
   return 0;
 }
