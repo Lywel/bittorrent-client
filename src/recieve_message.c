@@ -1,4 +1,5 @@
 #include <arpa/inet.h>
+#include <stdlib.h>
 #include <errno.h>
 #include <sys/socket.h>
 #include <stdint.h>
@@ -82,22 +83,31 @@ int
 recieve_message(struct peer *p)
 {
   struct message mess;
-  if (recv(p->sfd, &mess, 4096, 0) < 0)
+  // Filling up the first part of the struct (not reading the actual message)
+  if (recv(p->sfd, &mess, sizeof(struct message) - sizeof(char *), 0) < 0)
   {
-    perror("Could not recieve message");
+    perror("Could not read header");
     return -1;
   }
 
-
   uint32_t length = get_len(mess);
-
   debug("length %u", length);
   debug("message id %u", mess.id);
+
+  // No reading the actual message
+  mess.payload = malloc(length * sizeof(char));
+  if (recv(p->sfd, mess.payload, length, 0) < 0)
+  {
+    perror("Could not read message");
+    return -1;
+  }
+
   debug("payload :");
   for (unsigned long i = 0; i < length; ++i)
     printf("%x ", mess.payload[i]);
   putchar('\n');
 
   handle_message(mess, p);
+  free(mess.payload);
   return 1;
 }
