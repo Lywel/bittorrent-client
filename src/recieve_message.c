@@ -15,25 +15,32 @@ get_len(struct message mess)
   return length;
 }
 
-static void
+static size_t
 handle_bitfield(struct message mess)
 {
   char *pieces = g_bt.pieces;
+  size_t index = 0;
+
   for (size_t i = 0; i < get_len(mess); ++i)
   {
     char cur = mess.payload[i];
     char have = pieces[i];
 
     while (cur)
+    {
       if (!(have & 1) && (cur & 1))
       {
-        debug("I am interrested");
-        return;
+        debug("I am interrested in piece nb %u", index);
+        return index;
       }
+      index++;
+    }
 
     have >>= 1;
     cur >>= 1;
   }
+
+  return index;
 }
  
 static void

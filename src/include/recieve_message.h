@@ -4,6 +4,17 @@
 #include "message.h"
 #include "client.h"
 
+enum type
+{
+  KEEP_ALIVE,
+  CHOKE,
+  UNCHOKE,
+  INTERESTED,
+  NOT_INTERESTED,
+  HAVE,
+  BITFIELD
+};
+
 int recieve_message(struct peer *p);
 
 #endif
