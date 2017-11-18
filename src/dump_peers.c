@@ -12,7 +12,7 @@ int dump_peers()
   debug("dumping peers for: '%s'", g_bt.path);
   struct be_node *peers = dico_find(get_peer_list(g_bt.torrent), "peers");
 
-  debug("got peer list from server");
+  debug("peer list is ready, now dumping it");
 
   for (long long i = 0; peers->val.l[i]; ++i)
     printf("%s:%lld\n", dico_find_str(peers->val.l[i], "ip"),
