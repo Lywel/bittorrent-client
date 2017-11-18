@@ -6,25 +6,22 @@
 #include "request_tracker.h"
 #include "handshake.h"
 #include "dico_finder.h"
-#include "hash.h"
 #include "socket_init.h"
-#include "peer_id.h"
-#include "recieve_message.h"
+#include "client.h"
 
-static int download(char *path)
+struct bittorent g_bt;
+
+static int download()
 {
-  debug("starting download for %s", path);
+  debug("starting download for %s", g_bt.path);
 
-  struct be_node *torrent = bencode_file_decode(path);
-  struct be_node *peers = get_peer_list(torrent);
+  struct be_node *peers = get_peer_list(g_bt.dico);
   debug("got peer list from server");
 
   struct be_node *peers_ip = dico_find(peers, "peers");
-  s_buf *info = bencode_encode(dico_find(torrent, "info"));
-  char *info_hash = compute_sha1(info);
 
   connect_to_peer(peers_ip->val.l[0]);
-  send_handshake(generate_peer_id(), info_hash);
+  send_handshake(g_bt.peer_id, g_bt.info_hash);
   recieve_handshake(peers_ip->val.l[0]);
   recieve_message();
   return 0;
@@ -41,7 +38,6 @@ print_usage(char *bin)
 static int
 parse_args(int argc, char **argv)
 {
-  char *torrent = NULL;
   char action = 0;
 
   while (--argc > 0)
@@ -50,23 +46,26 @@ parse_args(int argc, char **argv)
       action = 'p';
     else if (!strcmp("--dump-peers", argv[argc]))
       action = 'd';
+    else if (!strcmp("--verbose", argv[argc]))
+      g_bt.verbose = 1;
     else if (!strncmp("--", argv[argc], 2))
       return print_usage(argv[0]);
     else
-      torrent = argv[argc];
+      g_bt.path = argv[argc];
   }
 
-  if (!torrent)
+  if (!g_bt.path)
     return print_usage(argv[0]);
 
+  client_init();
   switch (action)
   {
   case 'p':
-    return bencode_file_pretty_print(torrent);
+    return bencode_file_pretty_print();
   case 'd':
-    return dump_peers(torrent);
+    return dump_peers();
   default:
-    return download(torrent);
+    return download();
   }
 }
 

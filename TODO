@@ -1,11 +1,11 @@
-[ ] Read the subject twice
-[ ] Understand it
+[x] Read the subject twice
+[x] Understand it
   [x] read the official bitTorrent doc and link it with subject
   [x] write helper file with clearer descriptions of functions to implement
 [x] Make a meeting at 5:30 p.m. on tuesday to discuss our plans for multithreading implementation
 [ ] Make a testsuite
 [ ] Make a README
-[ ] Parse the bencode
+[x] Parse the bencode
   [x] Open the file and store the content in a string
   [x] Check the string recusivly for datatypes
   [x] Fill the tree
@@ -23,10 +23,10 @@
 [ ] More advanced autotools config
 [ ] Split he project in modules
 [ ] Compile each modules as a distinct static 'comfort' library
-[ ] TO FREE // CLOSE
-  [ ] free  : info_hash in create_request
-  [ ] free  : request in create_request
-  [ ] free  :answer in get_peer_list
+[x] TO FREE // CLOSE
+  [x] free  : info_hash in create_request
+  [x] free  : request in create_request
+  [x] free  : answer in get_peer_list
   [ ] close : socket in init_socket
 [ ] Create the debug function for the mandatory logs
 [x] Rename get_sha1 to compute_sha1()
@@ -35,3 +35,5 @@
   [ ] peer connection/disconnection
   [ ] peer messages
 [ ] getname for dump peers
+[ ] Create the global structure
+[ ] Create the download loop

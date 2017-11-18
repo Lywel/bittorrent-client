@@ -6,7 +6,7 @@
 struct be_node *
 dico_find(struct be_node *node, const char *key)
 {
-  if (node->type != BE_DIC)
+  if (!node || node->type != BE_DIC)
     return NULL;
   struct be_dico **dico = node->val.d;
   size_t i = 0;
