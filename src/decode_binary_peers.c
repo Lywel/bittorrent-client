@@ -26,7 +26,7 @@ parse_ip(char *str)
     ip->type = BE_STR;
     char *tmp = calloc(16, sizeof(char));
     uint32_t *ip_neto = (uint32_t *)str;
-    *ip_neto = ntohl(*ip_neto);
+    *ip_neto = *ip_neto;
     sprintf(tmp, "%u.%u.%u.%u",
       (uint8_t)str[0], (uint8_t)str[1],
       (uint8_t)str[2], (uint8_t)str[3]);
