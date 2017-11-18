@@ -1,7 +1,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <arpa/inet.h>
+#include "client.h"
 #include "debug.h"
+#include "dico_finder.h"
 #include "bencode.h"
 
 static struct be_node *
@@ -64,7 +66,21 @@ parse_peer_ip(char *str)
 void
 peer_list_init(struct be_node *node)
 {
-  node = node;
+  if (!node || node->type == BE_LST)
+    return;
+  debug("init peers list socket");
+  g_bt.peers = NULL;
+
+  long long i;
+  for (i = 0; node->val.l[i]; ++i)
+  {
+    g_bt.peers = realloc(g_bt.peers, (i + 1) * sizeof(struct peer *));
+    g_bt.peers[i] = calloc(1, sizeof(struct peer));
+    g_bt.peers[i]->ip = dico_find_str(node->val.l[i], "ip");
+    g_bt.peers[i]->port = dico_find_int(node->val.l[i], "port");
+  }
+  g_bt.peers = realloc(g_bt.peers, (i + 1) * sizeof(struct peer *));
+  g_bt.peers[i] = NULL;
 }
 
 void
