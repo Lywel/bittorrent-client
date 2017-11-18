@@ -76,6 +76,9 @@ get_peer_list(struct be_node *dico)
     return NULL;
 
   debug("performming curl request");
+  verbose("%x%x%x: tracker: requesting peers to %s\n", (uint8_t)g_bt.info_hash[0],
+    (uint8_t)g_bt.info_hash[1], (uint8_t)g_bt.info_hash[2],
+    dico_find_str(dico, "announce"));
 
   CURLcode res = curl_easy_perform(curl);
   debug("curl request is resolved with code %d", res);
