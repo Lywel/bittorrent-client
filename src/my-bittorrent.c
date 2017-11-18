@@ -17,8 +17,9 @@ static int download()
   debug("starting download for %s", g_bt.path);
 
   get_peer_list(g_bt.torrent);
-  debug("got peer list from server");
+  debug("peer list is ready");
 
+  peer_socket_init(g_bt.peers[0]);
   peer_connect(g_bt.peers[0]);
   send_handshake(g_bt.peers[0]);
   recieve_handshake(g_bt.peers[0]);
