@@ -8,6 +8,13 @@
 #include "send_message.h"
 #include "debug.h"
 
+static void
+set_len(uint32_t len, struct message *mess)
+{
+  len = htonl(len);
+  memcpy((void *)mess->len, (void *)&len, 4);
+}
+
 int
 send_message(void *message, size_t len, struct peer *p)
 {
@@ -52,7 +59,7 @@ get_message(enum type type)
   }
   return mess;
 }
-  
+ 
 int
 send_message_type(enum type type, struct peer *p)
 {
