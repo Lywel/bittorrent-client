@@ -1,11 +1,10 @@
 #ifndef DEBUG_H
 # define DEBUG_H
 
-# define TRACREQ_FMT "%s: tracker: requesting peers to %s\n"
-# define CONNECT_FMT "%s: peers: %s: %s:%d\n"
-# define PEERMSG_FMT "%s: msg: %s: %s:%d: %s"
-# define CYAN    "\x1b[36m"
+# define KCYN "\x1b[36m"
+# define KNRM "\x1B[0m"
 
 void debug(char *fmt, ...);
+void verbose(char *fmt, ...);
 
 #endif
