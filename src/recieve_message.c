@@ -68,19 +68,16 @@ handle_bitfield(struct message mess)
   for (size_t i = 0; i < mess.len; ++i)
   {
     char cur = mess.payload[i];
+    char have = pieaces[i];
+
     while (cur)
-    {
-      for (size_t j = 0; j < mess.len; ++j)
+      if (!(have & 1) && (cur & 1))
       {
-        char have = pieces[j];
-        while (have)
-        {
-          if (!(have & 1) && (cur & 1))
-            debug("I am interrested");
-        }
-        have >>= 1;
+        debug("I am interrested");
+        return;
       }
-      cur >>= 1;
-    }
+
+    have >>= 1;
+    cur >>= 1;
   }
 }
