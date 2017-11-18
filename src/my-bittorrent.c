@@ -9,6 +9,7 @@
 #include "hash.h"
 #include "socket_init.h"
 #include "peer_id.h"
+#include "recieve_message.h"
 
 static int download(char *path)
 {
@@ -25,6 +26,7 @@ static int download(char *path)
   connect_to_peer(peers_ip->val.l[0]);
   send_handshake(generate_peer_id(), info_hash);
   recieve_handshake(peers_ip->val.l[0]);
+  recieve_message();
   return 0;
 }
 

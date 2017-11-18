@@ -10,8 +10,8 @@ void debug(char *fmt, ...)
 #if DEBUG
   va_list args;
   va_start(args, fmt);
-  char *fmtfmt = "=== %s\n";
-  char *format = calloc(strlen(fmtfmt) + strlen(fmt) + 1, sizeof(char));
+  char *fmtfmt = "===%s\n";
+  char *format = calloc(8 + strlen(fmtfmt) + strlen(fmt) + 1, sizeof(char));
   sprintf(format, fmtfmt, fmt);
   vfprintf(stderr, format, args);
   free(format);
