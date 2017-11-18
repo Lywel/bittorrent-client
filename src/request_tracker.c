@@ -22,12 +22,13 @@ build_tracker_uri(struct be_node *dico, CURL *curl)
   char *format = "%s?peer_id=%s&info_hash=%s&port=%u&left=0&downloaded=0&"
                  "uploaded=0&compact=1";
 
-  long long len = strlen(format) + strlen(urn) + 41;
+  long long len = strlen(format) + strlen(urn) + strlen(e_info_hash) + 23;
   char *uri = calloc(len, sizeof(char));
   if (!uri)
     return NULL;
 
   sprintf(uri, format, urn, g_bt.peer_id, e_info_hash, g_bt.port);
+
 
   curl_free(e_info_hash);
   return uri;
@@ -81,7 +82,6 @@ get_peer_list(struct be_node *dico)
 
   if (res == CURLE_OK)
   {
-    debug("raw answer form server: '%s'", data->str);
     peer_list = bencode_decode(data->str, data->len);
     buffer_free(data);
   }
