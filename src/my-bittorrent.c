@@ -23,6 +23,7 @@ static int download()
   peer_connect(g_bt.peers[0]);
   send_handshake(g_bt.peers[0]);
   recieve_handshake(g_bt.peers[0]);
+  recieve_message(g_bt.peers[0]);
   return 0;
 }
 
