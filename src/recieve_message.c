@@ -7,29 +7,36 @@
 #include "debug.h"
 #include "recieve_message.h"
 
-int
-recieve_message(void)
+static uint32_t
+get_len(struct message mess)
 {
-  struct message mess;
-  if (recv(client.socketfd, &mess, 4096, 0) < 0)
-  {
-    perror("Could not recieve message");
-    return -1;
-  }
-
-
   uint32_t *lenn = (uint32_t *)mess.len;
   uint32_t length = ntohl(*lenn);
-
-  debug("length %d", length);
-  debug("message id %u", mess.id);
-  debug("payload %s", mess.payload);
-
-  handle_message(mess);
-  return 1;
+  return length;
 }
 
-void
+static void
+handle_bitfield(struct message mess)
+{
+  char *pieces = g_bt.pieces;
+  for (size_t i = 0; i < get_len(mess); ++i)
+  {
+    char cur = mess.payload[i];
+    char have = pieces[i];
+
+    while (cur)
+      if (!(have & 1) && (cur & 1))
+      {
+        debug("I am interrested");
+        return;
+      }
+
+    have >>= 1;
+    cur >>= 1;
+  }
+}
+ 
+static void
 handle_message(struct message mess)
 {
   if (mess.len == 0)
@@ -60,24 +67,24 @@ handle_message(struct message mess)
     break;
   }
 }
-
-void
-handle_bitfield(struct message mess)
+ 
+int
+recieve_message(struct peer *p)
 {
-  char *pieces = g_bt.pieces;
-  for (size_t i = 0; i < mess.len; ++i)
+  struct message mess;
+  if (recv(p->sfd, &mess, 4096, 0) < 0)
   {
-    char cur = mess.payload[i];
-    char have = pieaces[i];
-
-    while (cur)
-      if (!(have & 1) && (cur & 1))
-      {
-        debug("I am interrested");
-        return;
-      }
-
-    have >>= 1;
-    cur >>= 1;
+    perror("Could not recieve message");
+    return -1;
   }
+
+
+  uint32_t length = get_len(mess);
+
+  debug("length %d", length);
+  debug("message id %u", mess.id);
+  debug("payload %s", mess.payload);
+
+  handle_message(mess);
+  return 1;
 }

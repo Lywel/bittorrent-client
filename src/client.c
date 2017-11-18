@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "buffer.h"
 #include "peer_id.h"
 #include "bencode.h"
