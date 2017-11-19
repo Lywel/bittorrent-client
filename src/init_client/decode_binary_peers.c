@@ -27,8 +27,6 @@ parse_ip(char *str)
   {
     ip->type = BE_STR;
     char *tmp = calloc(16, sizeof(char));
-    uint32_t *ip_neto = (uint32_t *)str;
-    *ip_neto = *ip_neto;
     sprintf(tmp, "%u.%u.%u.%u",
       (uint8_t)str[0], (uint8_t)str[1],
       (uint8_t)str[2], (uint8_t)str[3]);
@@ -51,7 +49,10 @@ parse_peer_ip(char *str)
   peer->val.d[0] = malloc(sizeof(struct be_dico));
   peer->val.d[1] = malloc(sizeof(struct be_dico));
   if (!peer->val.d[0] || !peer->val.d[1])
+  {
+    bencode_free_node(peer);
     return NULL;
+  }
   peer->val.d[0]->key = calloc(3, sizeof(char));
   strcpy(peer->val.d[0]->key, "ip");
   peer->val.d[0]->val = parse_ip(str);

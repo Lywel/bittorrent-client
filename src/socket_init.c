@@ -26,6 +26,7 @@ peer_socket_init(struct peer *peer)
   if (sock < 0)
   {
     perror("Can not initialize socket.");
+    free(info);
     return -1;
   }
 
