@@ -47,6 +47,12 @@ peer_socket_init(struct peer *peer)
 
   peer->sfd = sock;
   peer->info = info;
+  peer->am_interested = 0;
+  peer->am_choking = 1;
+  peer->peer_choking = 1;
+  peer->peer_interested = 0;
+  peer->connected = 0;
+  peer->handshaked = 0;
   return 0;
 }
 
