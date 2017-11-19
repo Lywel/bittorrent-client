@@ -36,3 +36,9 @@ Makefile.in
 /missing
 /stamp-h1
 
+*/Makefile
+*/config.h
+*/config.status
+*/.deps/
+tags
+
