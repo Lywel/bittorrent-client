@@ -141,10 +141,3 @@ bencode_free_node(struct be_node *node)
     free(node);
   }
 }
-
-int
-bencode_file_pretty_print()
-{
-  bencode_dump_json(g_bt.torrent);
-  return 0;
-}

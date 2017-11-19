@@ -6,11 +6,11 @@
 #include "buffer.h"
 #include "bencode.h"
 #include "dico_finder.h"
-#include "request_tracker.h"
 #include "debug.h"
 #include "decode_binary_peers.h"
 #include "socket_init.h"
 #include "client.h"
+#include "get_peer_list.h"
 
 static char *
 build_tracker_uri(struct be_node *dico, CURL *curl)
@@ -66,7 +66,7 @@ build_curl_request(struct be_node *dico, s_buf **data)
 }
 
 struct be_node *
-get_peer_list(struct be_node *dico)
+get_peer_list_from_tracker(struct be_node *dico)
 {
   s_buf *data = NULL;
   struct be_node *peer_list = NULL;

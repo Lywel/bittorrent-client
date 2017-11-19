@@ -51,8 +51,7 @@ peer_socket_init(struct peer *peer)
   peer->am_choking = 1;
   peer->peer_choking = 1;
   peer->peer_interested = 0;
-  peer->connected = 0;
-  peer->handshaked = 0;
+  peer->status = P_DECO;
   return 0;
 }
 
