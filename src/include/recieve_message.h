@@ -1,8 +1,6 @@
 #ifndef RECIEVE_MESSAGE_H
 # define RECIEVE_MESSAGE_H
-
-#include "message.h"
-#include "client.h"
+# include "client.h"
 
 enum type
 {

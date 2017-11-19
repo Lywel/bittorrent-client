@@ -1,8 +1,6 @@
 #ifndef CLIENT_H
 # define CLIENT_H
-
 # include <stdint.h>
-# include "bencode.h"
 
 enum peer_status
 {

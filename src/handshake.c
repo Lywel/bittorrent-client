@@ -1,5 +1,5 @@
-#include <errno.h>
 #include <string.h>
+#include <stdio.h>
 #include <sys/socket.h>
 #include "client.h"
 #include "debug.h"

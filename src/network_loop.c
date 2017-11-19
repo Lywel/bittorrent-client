@@ -1,6 +1,7 @@
 #include <poll.h>
 #include <sys/socket.h>
 #include <string.h>
+#include <stdio.h>
 #include "debug.h"
 #include "network_loop.h"
 #include "recieve_message.h"

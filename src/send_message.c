@@ -2,6 +2,7 @@
 #include <sys/socket.h>
 #include <string.h>
 #include <stdint.h>
+#include <stdio.h>
 #include "recieve_message.h"
 #include "client.h"
 #include "message.h"
