@@ -4,6 +4,14 @@
 # include <stdint.h>
 # include "bencode.h"
 
+enum peer_status
+{
+  P_DECO,
+  P_CO,
+  P_HDSK,
+  P_READ
+};
+
 struct peer
 {
   int sfd;
@@ -14,8 +22,7 @@ struct peer
   char am_interested;
   char peer_choking;
   char peer_interested;
-  char handshaked;
-  char connected;
+  enum peer_status status;
 };
 
 struct bittorent

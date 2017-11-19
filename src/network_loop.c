@@ -8,7 +8,7 @@
 #include "socket_close.h"
 
 static int
-is_connected(struct peer *peer)
+connect_succeeded(struct peer *peer)
 {
     int sfd = peer->sfd;
     int result;
@@ -53,22 +53,22 @@ network_loop(int efd, struct epoll_event *events)
         continue;
       }
       struct peer *peer = evt.data.ptr;
+
       debug("event with peer: %s", peer->ip);
       if ((evt.events & EPOLLIN))
       {
-        if (peer->handshaked == 1)
+        if (peer->status == P_CO)
           recieve_handshake(peer);
         else
           recieve_message(peer);
       }
       if ((evt.events & EPOLLOUT))
       {
-        if (!peer->connected)
-          if (is_connected(peer))
-            peer->connected = 1;
-
-        if (!peer->handshaked)
+        if (peer->status == P_DECO && connect_succeeded(peer))
+        {
+          peer->status = P_CO;
           send_handshake(peer);
+        }
       }
     }
   }
