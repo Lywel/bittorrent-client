@@ -32,6 +32,7 @@ handle_bitfield(struct message mess)
     {
       if (!(have & (1 << j)) && (cur & (1 << j)))
       {
+        g_bt.pieces[i] |= 1 << j;
         debug("I am interrested in piece nb %u", index + 1);
         return index + 1;
       }
