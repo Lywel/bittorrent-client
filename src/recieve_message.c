@@ -17,20 +17,20 @@ get_len(struct message mess)
   return length;
 }
 
-static size_t
+static int
 handle_bitfield(struct message mess)
 {
   char *pieces = g_bt.pieces;
-  size_t index = -1;
+  int index = -1;
 
   for (size_t i = 0; i < get_len(mess); ++i)
   {
     char cur = mess.payload[i];
     char have = pieces[i];
 
-    for (char i = 7; i >= 0; --i)
+    for (char j = 7; j >= 0; --j)
     {
-      if (!(have & (1 << i)) && (cur & (1 << i)))
+      if (!(have & (1 << j)) && (cur & (1 << j)))
       {
         debug("I am interrested in piece nb %u", index + 1);
         return index + 1;
@@ -42,36 +42,56 @@ handle_bitfield(struct message mess)
   return index;
 }
 
+int
+recieve_piece(struct peer *p)
+{
+  struct piece piece;
+  if (recv(p->sfd, &piece, sizeof(struct piece) - sizeof(char *), 0) < 0)
+  {
+    perror("Could not read piece header");
+    return -1;
+  }
+  
+  uint32_t length = get_len(*(struct message *)&piece) - 9;
+  debug("block len : %u", length);
+  piece.block = malloc(length * sizeof(char));
+
+  if (recv(p->sfd, piece.block, length, 0) < 0)
+  {
+    perror("Could not read block");
+    return -1;
+  }
+
+  return 0;
+}
+
 static void
 handle_message(struct message mess, struct peer *p)
 {
-  if (mess.len == 0)
-  {
-    debug("recieved keep alive message");
-    return;
-  }
-
-  int i;
   switch(mess.id)
   {
   case 0:
     debug("recieved choke message");
+    p->am_choking = 1;
     break;
   case 1:
     debug("recieved unchocke message");
+    p->am_choking = 0;
     break;
   case 2:
     debug("recieved interested message");
+    p->peer_interested = 1;
     break;
   case 3:
     debug("recieved not interested message");
+    p->peer_interested = 0;
     break;
   case 4:
     debug("recieved have message");
     break;
   case 5:
-    if ((i = handle_bitfield(mess)) != -1)
-      send_message_type(INTERESTED, p);
+    if ((handle_bitfield(mess)) != -1)
+      p->am_interested = 1;
     break;
   case 7:
     debug("recieved piece");
@@ -94,18 +114,21 @@ recieve_message(struct peer *p)
   debug("length %u", length);
   debug("message id %u", mess.id);
 
-  // No reading the actual message
-  mess.payload = malloc(length * sizeof(char));
-  if (recv(p->sfd, mess.payload, length, 0) < 0)
+  if (length > 1)
   {
-    perror("Could not read message");
-    return -1;
-  }
+  // Now reading the actual message
+    mess.payload = malloc(length * sizeof(char));
+    if (recv(p->sfd, mess.payload, length, 0) < 0)
+    {
+      perror("Could not read message");
+      return -1;
+    }
 
-  debug("payload :");
-  for (unsigned long i = 0; i < length; ++i)
-    printf("%x ", mess.payload[i]);
-  putchar('\n');
+    debug("payload :");
+    for (unsigned long i = 0; i < length; ++i)
+      printf("%x ", mess.payload[i]);
+    putchar('\n');
+  }
 
   handle_message(mess, p);
   free(mess.payload);

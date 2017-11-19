@@ -8,6 +8,13 @@
 #include "send_message.h"
 #include "debug.h"
 
+static void
+set_len(uint32_t len, struct message *mess)
+{
+  len = htonl(len);
+  memcpy((void *)mess->len, (void *)&len, 4);
+}
+
 int
 send_message(void *message, size_t len, struct peer *p)
 {
@@ -20,12 +27,16 @@ send_message(void *message, size_t len, struct peer *p)
 }
 
 int
-send_request_message(struct peer *p, int index, int begin, int length)
+send_request_message(struct peer *p, int index, int begin)
 {
   struct request req;
+
+  req.id = 6;
+
   req.index = index;
   req.begin = begin;
-  req.length = length;
+  req.length = B_SIZE;
+
   req.len[0] = 3;
   req.len[1] = 1;
   req.len[2] = 0;
@@ -35,28 +46,40 @@ send_request_message(struct peer *p, int index, int begin, int length)
 }
 
 static struct message
-get_message(enum type type)
+get_message(enum type type, struct peer *p)
 {
-  uint32_t len;
   struct message mess;
   mess.payload = NULL;
   switch (type)
   {
     case INTERESTED:
-      len = htonl(1);
-      memcpy((void *)mess.len, (void *)&len, 4);
+      p->am_interested = 1;
+      set_len(1, &mess);
       mess.id = 2;
       return mess;
-    default:
+    case NOT_INTERESTED:
+      p->am_interested = 0;
+      set_len(1, &mess);
+      mess.id = 3;
+      return mess;
+    case CHOKE:
+      p->peer_choking = 1;
+      set_len(1, &mess);
       mess.id = 0;
-      break;
+      return mess;
+    case UNCHOKE:
+      p->peer_choking = 0;
+      set_len(1, &mess);
+      mess.id = 1;
+      return mess;
+    default:
+      return mess;
   }
-  return mess;
 }
 
 int
 send_message_type(enum type type, struct peer *p)
 {
-  struct message mess = get_message(type);
+  struct message mess = get_message(type, p);
   return send_message(&mess, sizeof(mess), p);
 }
