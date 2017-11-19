@@ -13,7 +13,6 @@ my_bittorrent_SOURCES = \
   dico_finder.c \
   peer_id.c \
   my-bittorrent.c \
-  hash.c \
   socket_init.c \
   socket_close.c \
   handshake.c \
