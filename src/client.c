@@ -7,7 +7,7 @@
 #include "dico_finder.h"
 
 void
-client_init(void)
+init_client(void)
 {
   g_bt.verbose = (g_bt.verbose == 1) || 0;
 
@@ -27,4 +27,12 @@ client_init(void)
   s_buf *info = bencode_encode(dico_find(g_bt.torrent, "info"));
   g_bt.info_hash = compute_sha1(info);
   buffer_free(info);
+}
+
+void
+free_client(void)
+{
+  free(g_bt.peer_id);
+  bencode_free_node(g_bt.torrent);
+  free(g_bt.info_hash);
 }

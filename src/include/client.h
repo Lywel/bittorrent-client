@@ -32,6 +32,7 @@ struct bittorent
 
 extern struct bittorent g_bt;
 
-void client_init(void);
+void init_client(void);
+void free_client(void);
 
 #endif
