@@ -10,7 +10,8 @@
 int dump_peers()
 {
   debug("dumping peers for: '%s'", g_bt.path);
-  struct be_node *peers = dico_find(get_peer_list(g_bt.torrent), "peers");
+  struct be_node *peer_list = get_peer_list(g_bt.torrent);
+  struct be_node *peers = dico_find(peer_list, "peers");
 
   debug("peer list is ready, now dumping it");
 
@@ -18,6 +19,6 @@ int dump_peers()
     printf("%s:%lld\n", dico_find_str(peers->val.l[i], "ip"),
                     dico_find_int(peers->val.l[i], "port"));
 
-  bencode_free_node(peers);
+  bencode_free_node(peer_list);
   return 0;
 }
