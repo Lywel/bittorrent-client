@@ -71,6 +71,7 @@ static void
 handle_message(struct message mess, struct peer *p)
 {
   verbose_recv(mess, p);
+  uint32_t ret;
   switch(mess.id)
   {
   case 0:
@@ -93,8 +94,11 @@ handle_message(struct message mess, struct peer *p)
     debug("recieved have message");
     break;
   case 5:
-    if (handle_bitfield(mess) < get_len(mess))
+    if ((ret = handle_bitfield(mess)) < get_len(mess))
+    {
       p->am_interested = 1;
+      p->piece_nb = ret;
+    }
     break;
   case 7:
     debug("recieved piece");

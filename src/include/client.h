@@ -20,6 +20,7 @@ struct peer
   char am_interested;
   char peer_choking;
   char peer_interested;
+  int piece_nb;
   enum peer_status status;
 };
 

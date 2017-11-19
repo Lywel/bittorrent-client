@@ -28,20 +28,21 @@ send_message(void *message, size_t len, struct peer *p)
 }
 
 int
-send_request_message(struct peer *p, int index, int begin)
+send_request_message(struct peer *p, int begin)
 {
+  debug("requesting piece nb %d", p->piece_nb);
   struct request req;
 
   req.id = 6;
 
-  req.index = index;
-  req.begin = begin;
-  req.length = B_SIZE;
+  req.index = htonl(p->piece_nb);
+  req.begin = htonl(begin);
+  req.length = htonl(B_SIZE);
 
-  req.len[0] = 3;
-  req.len[1] = 1;
+  req.len[0] = 0;
+  req.len[1] = 0;
   req.len[2] = 0;
-  req.len[3] = 0;
+  req.len[3] = 13;
 
   return send_message(&req, sizeof(req), p);
 }
