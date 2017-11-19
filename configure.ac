@@ -8,7 +8,7 @@ AC_INIT([my-bittorrent], [0.1], [maxime.lewandowski@epita.fr])
 AC_CONFIG_HEADERS([config.h])
 
 # Initialize automake
-AM_INIT_AUTOMAKE([foreign -Wall -Werror])
+AM_INIT_AUTOMAKE([foreign subdir-objects -Wall -Werror])
 
 # Checks for programs.
 AC_PROG_CC_C99
