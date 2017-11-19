@@ -3,16 +3,18 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/epoll.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #include <fcntl.h>
 #include "bencode.h"
 #include "dump_peers.h"
 #include "debug.h"
 #include "request_tracker.h"
-#include "recieve_message.h"
-#include "handshake.h"
 #include "dico_finder.h"
 #include "socket_init.h"
 #include "socket_close.h"
+#include "network_loop.h"
 #include "client.h"
 
 struct bittorent g_bt;
@@ -34,53 +36,26 @@ make_socket_non_blocking(int sfd)
   return 0;
 }
 
-static int
-event_loop(int efd, struct epoll_event *events)
+static void
+init_epoll_event(struct peer *peer, int efd)
 {
-  while (1)
+  struct epoll_event event;
+  if (peer_socket_init(peer)
+    + make_socket_non_blocking(peer->sfd)
+    + peer_connect(peer) < 0)
   {
-    debug("event loop starts");
-    int n = epoll_wait(efd, events, 13, -1);
-    if (n < 0)
-    {
-      perror("epoll wait timedout");
-      continue;
-    }
-    debug("there is %d events to handle", n);
-    for (int i = 0; i < n; ++i)
-    {
-      debug("handling event %d", i);
-
-      //send_handshake(g_bt.peers[i]) + recieve_handshake(g_bt.peers[i] n);
-      debug("EPOLLERR: %x", EPOLLERR);
-      debug("EPOLLHUP: %x", EPOLLHUP);
-      debug("EPOLLIN: %x", EPOLLIN);
-      debug("curent event: %x", events[i].events);
-      for (long long i = 0; g_bt.peers[i]; ++i)
-      {
-        if (events[i].data.fd == g_bt.peers[i]->sfd)
-        {
-          debug("peer: %s", g_bt.peers[i]->ip);
-          //recieve_message(g_bt.peers[i]);
-          break;
-        }
-      }
-      /*
-      if (events[i].events & EPOLLERR)
-      {
-        debug("epoll error");
-        close(events[i].data.fd);
-        continue;
-      }
-      else
-      {
-      }*/
-    }
+    debug("FAILED : peer init / connect");
+    peer_socket_close(peer);
+    return;
   }
-  return 0;
+  event.data.ptr = peer;
+  event.events = EPOLLIN | EPOLLOUT | EPOLLERR | EPOLLET;
+  epoll_ctl(efd, EPOLL_CTL_ADD, peer->sfd, &event);
+  return;
 }
 
-static int download()
+static int
+download(void)
 {
   debug("starting download for %s", g_bt.path);
 
@@ -94,25 +69,11 @@ static int download()
     return -1;
   }
 
-  struct epoll_event event;
+  for (long long i = 0; i < 2 && g_bt.peers[i]; ++i)
+    init_epoll_event(g_bt.peers[i], efd);
 
-  long long i;
-  for (i = 0; g_bt.peers[i]; ++i)
-  {
-    if (peer_socket_init(g_bt.peers[i])
-      + make_socket_non_blocking(g_bt.peers[i]->sfd)
-      + peer_connect(g_bt.peers[i]) < 0)
-    {
-      peer_socket_close(g_bt.peers[i]);
-      continue;
-    };
-    event.data.fd = g_bt.peers[i]->sfd;
-    event.events = EPOLLIN | EPOLLET;
-    if (epoll_ctl(efd, EPOLL_CTL_ADD, g_bt.peers[i]->sfd, &event) < 0)
-      break;
-  }
-  struct epoll_event *events = calloc(13, sizeof(event));
-  int res = event_loop(efd, events);
+  struct epoll_event *events = calloc(64, sizeof(struct epoll_event));
+  int res = network_loop(efd, events);
   free(events);
   return res;
 }

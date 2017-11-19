@@ -51,7 +51,7 @@ recieve_piece(struct peer *p)
     perror("Could not read piece header");
     return -1;
   }
-  
+
   uint32_t length = get_len(*(struct message *)&piece) - 9;
   debug("block len : %u", length);
   piece.block = malloc(length * sizeof(char));
@@ -102,6 +102,7 @@ handle_message(struct message mess, struct peer *p)
 int
 recieve_message(struct peer *p)
 {
+  debug("recieve_message");
   struct message mess;
   // Filling up the first part of the struct (not reading the actual message)
   if (recv(p->sfd, &mess, sizeof(struct message) - sizeof(char *), 0) < 0)
@@ -114,7 +115,7 @@ recieve_message(struct peer *p)
   debug("length %u", length);
   debug("message id %u", mess.id);
 
-  if (length > 1)
+  if (length > 1 && length < 1000)
   {
   // Now reading the actual message
     mess.payload = malloc(length * sizeof(char));
