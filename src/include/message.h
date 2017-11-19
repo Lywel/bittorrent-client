@@ -13,6 +13,7 @@ struct __attribute__((__packed__)) message
 struct __attribute__((__packed__)) request
 {
   unsigned char len[4];
+  uint8_t id;
   int index;
   int begin;
   int length;

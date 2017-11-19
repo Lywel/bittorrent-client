@@ -30,9 +30,13 @@ int
 send_request_message(struct peer *p, int index, int begin, int length)
 {
   struct request req;
+
+  req.id = 6;
+
   req.index = index;
   req.begin = begin;
   req.length = length;
+
   req.len[0] = 3;
   req.len[1] = 1;
   req.len[2] = 0;
@@ -53,10 +57,24 @@ get_message(enum type type, struct peer *p)
       set_len(1, &mess);
       mess.id = 2;
       return mess;
+    case NOT_INTERESTED:
+      p->am_interested = 0;
+      set_len(1, &mess);
+      mess.id = 3;
+      return mess;
+    case CHOKE:
+      p->peer_choking = 1;
+      set_len(1, &mess);
+      mess.id = 0;
+      return mess;
+    case UNCHOKE:
+      p->peer_choking = 0;
+      set_len(1, &mess);
+      mess.id = 1;
+      return mess;
     default:
       return mess;
   }
-  return mess;
 }
 
 int
