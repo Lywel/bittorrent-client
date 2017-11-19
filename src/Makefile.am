@@ -4,15 +4,14 @@ AM_LDFLAGS = -lcurl -lcrypto -lm
 bin_PROGRAMS = my-bittorrent
 my_bittorrent_CPPFLAGS = -I$(srcdir)/include
 my_bittorrent_SOURCES = \
+  bencode/bencode.c \
+  bencode/bencode_json.c \
+  bencode/bencode_parser.c \
+  get_peer_list.c \
   buffer.c \
-  bencode.c \
-  bencode_json.c \
-  bencode_parser.c \
   debug.c \
-  request_tracker.c \
   dico_finder.c \
   peer_id.c \
-  dump_peers.c \
   my-bittorrent.c \
   hash.c \
   socket_init.c \

@@ -8,9 +8,9 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include "bencode.h"
-#include "dump_peers.h"
+#include "bencode_json.h"
+#include "get_peer_list.h"
 #include "debug.h"
-#include "request_tracker.h"
 #include "dico_finder.h"
 #include "socket_init.h"
 #include "socket_close.h"
@@ -59,7 +59,9 @@ download(void)
 {
   debug("starting download for %s", g_bt.path);
 
-  get_peer_list(g_bt.torrent);
+  struct be_node *peers = get_peer_list_from_tracker(g_bt.torrent);
+  free(peers);
+
   debug("peer list is ready");
 
   int efd = epoll_create1(0);
@@ -69,7 +71,7 @@ download(void)
     return -1;
   }
 
-  for (long long i = 0; i < 2 && g_bt.peers[i]; ++i)
+  for (long long i = 0; g_bt.peers[i]; ++i)
     init_epoll_event(g_bt.peers[i], efd);
 
   struct epoll_event *events = calloc(64, sizeof(struct epoll_event));
@@ -84,6 +86,27 @@ print_usage(char *bin)
   fprintf(stderr, "Usage: %s /path/to/file.torrent "
                   "[--pretty-print-torrent-file|--dump-peers]\n", bin);
   return -1;
+}
+
+static int
+pretty_print_torrent_file(void)
+{
+  bencode_dump_json(g_bt.torrent);
+  return 0;
+}
+
+static int
+dump_peers(void)
+{
+  struct be_node *peer_list = get_peer_list_from_tracker(g_bt.torrent);
+  struct be_node *peers = dico_find(peer_list, "peers");
+
+  for (long long i = 0; peers->val.l[i]; ++i)
+    printf("%s:%lld\n", dico_find_str(peers->val.l[i], "ip"),
+                    dico_find_int(peers->val.l[i], "port"));
+
+  bencode_free_node(peer_list);
+  return 0;
 }
 
 static int
@@ -109,16 +132,21 @@ parse_args(int argc, char **argv)
   if (!g_bt.path)
     return print_usage(argv[0]);
 
-  client_init();
+  init_client();
+  int res = 0;
   switch (action)
   {
   case 'p':
-    return bencode_file_pretty_print();
+    res = pretty_print_torrent_file();
+    break;
   case 'd':
-    return dump_peers();
+    res = dump_peers();
+    break;
   default:
-    return download();
+    res = download();
   }
+  free_client();
+  return res;
 }
 
 int
