@@ -42,15 +42,32 @@ handle_bitfield(struct message mess)
   return index;
 }
 
+int
+recieve_piece(struct peer *p)
+{
+  struct piece piece;
+  if (recv(p->sfd, &piece, sizeof(struct piece) - sizeof(char *), 0) < 0)
+  {
+    perror("Could not read piece header");
+    return -1;
+  }
+  
+  uint32_t length = get_len(*(struct message *)&piece) - 9;
+  debug("block len : %u", length);
+  piece.block = malloc(length * sizeof(char));
+
+  if (recv(p->sfd, piece.block, length, 0) < 0)
+  {
+    perror("Could not read block");
+    return -1;
+  }
+
+  return 0;
+}
+
 static void
 handle_message(struct message mess, struct peer *p)
 {
-  if (mess.len == 0)
-  {
-    debug("recieved keep alive message");
-    return;
-  }
-
   switch(mess.id)
   {
   case 0:

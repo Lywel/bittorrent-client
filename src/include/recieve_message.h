@@ -16,5 +16,6 @@ enum type
 };
 
 int recieve_message(struct peer *p);
+int recieve_piece(struct peer *p);
 
 #endif

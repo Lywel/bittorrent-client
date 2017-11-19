@@ -27,7 +27,7 @@ send_message(void *message, size_t len, struct peer *p)
 }
 
 int
-send_request_message(struct peer *p, int index, int begin, int length)
+send_request_message(struct peer *p, int index, int begin)
 {
   struct request req;
 
@@ -35,7 +35,7 @@ send_request_message(struct peer *p, int index, int begin, int length)
 
   req.index = index;
   req.begin = begin;
-  req.length = length;
+  req.length = B_SIZE;
 
   req.len[0] = 3;
   req.len[1] = 1;
