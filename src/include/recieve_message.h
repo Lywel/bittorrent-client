@@ -1,6 +1,7 @@
 #ifndef RECIEVE_MESSAGE_H
 # define RECIEVE_MESSAGE_H
 # include "client.h"
+# include "message.h"
 
 enum type
 {
@@ -14,6 +15,6 @@ enum type
 };
 
 int recieve_message(struct peer *p);
-int recieve_piece(struct peer *p);
+int recieve_piece(struct message mess, struct peer *p);
 
 #endif

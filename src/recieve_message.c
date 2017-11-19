@@ -30,25 +30,17 @@ handle_bitfield(struct message mess, struct peer *p)
 }
 
 int
-recieve_piece(struct peer *p)
+recieve_piece(struct message mess, struct peer *p)
 {
-  struct piece piece;
-  if (recv(p->sfd, &piece, sizeof(struct piece) - sizeof(char *), 0) < 0)
-  {
-    perror("Could not read piece header");
-    return -1;
-  }
-
-  uint32_t length = get_len(*(struct message *)&piece) - 9;
-  debug("block len : %u", length);
-  piece.block = malloc(length * sizeof(char));
-
-  if (recv(p->sfd, piece.block, length, 0) < 0)
-  {
-    perror("Could not read block");
-    return -1;
-  }
-
+  // verify if we finished a block
+  // if so checksum the block
+  // compare checksum to expected one
+  // if ok, write to disk
+  // send HAVE to peers
+  p = p;
+  uint32_t len = get_len(mess);
+  for (uint32_t i = 0; i < len; ++i)
+    putchar(mess.payload[i]);
   return 0;
 }
 
@@ -80,7 +72,7 @@ handle_message(struct message mess, struct peer *p)
   case 5:
     return handle_bitfield(mess, p);
   case 7:
-    return recieve_piece(p);
+    return recieve_piece(mess, p);
   }
   return 0;
 }
