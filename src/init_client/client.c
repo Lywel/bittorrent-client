@@ -1,6 +1,7 @@
 #include <openssl/sha.h>
 #include <stdlib.h>
 #include "buffer.h"
+#include "debug.h"
 #include "peer_id.h"
 #include "bencode.h"
 #include "client.h"
@@ -43,9 +44,11 @@ init_client(void)
   g_bt.torrent = bencode_file_decode(g_bt.path);
 
   // Keeping track of downloaded pieces
-  int pieces_nb = dico_find(dico_find(g_bt.torrent, "info"), "pieces")->val.s->len / 20;
-  int bytes = pieces_nb / 8 + pieces_nb % 8 != 0;
-  char *pieces = calloc(bytes, 1);
+  uint32_t pieces_nb = dico_find(dico_find(g_bt.torrent, "info"), "pieces")->val.s->len / 20;
+  debug("torrent has %u pieces", pieces_nb);
+  uint32_t bytes = pieces_nb / 8 + !!(pieces_nb % 8);
+  debug("torrent allocates %u char to store it", bytes);
+  char *pieces = calloc(bytes, sizeof(char));
   g_bt.pieces = pieces;
 
   // Info hash

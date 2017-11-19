@@ -1,6 +1,6 @@
 #include <arpa/inet.h>
+#include <stdio.h>
 #include <stdlib.h>
-#include <errno.h>
 #include <sys/socket.h>
 #include <stdint.h>
 #include "message.h"
@@ -14,27 +14,28 @@ get_len(struct message mess)
 {
   uint32_t *lenn = (uint32_t *)mess.len;
   uint32_t length = ntohl(*lenn);
-  return length;
+  return length - 1;
 }
 
-static int
+static uint32_t
 handle_bitfield(struct message mess)
 {
   char *pieces = g_bt.pieces;
-  int index = -1;
+  uint32_t index = 0;
+  uint32_t len = get_len(mess);
 
-  for (size_t i = 0; i < get_len(mess); ++i)
+  for (size_t i = 0; i < len; ++i)
   {
     char cur = mess.payload[i];
     char have = pieces[i];
 
-    for (char j = 7; j >= 0; --j)
+    for (char j = 7; j >= 0 && index < len; --j)
     {
       if (!(have & (1 << j)) && (cur & (1 << j)))
       {
         g_bt.pieces[i] |= 1 << j;
-        debug("I am interrested in piece nb %u", index + 1);
-        return index + 1;
+        debug("I am interrested in piece nb %u", index);
+        return index;
       }
       index++;
     }
@@ -69,6 +70,7 @@ recieve_piece(struct peer *p)
 static void
 handle_message(struct message mess, struct peer *p)
 {
+  verbose_recv(mess, p);
   switch(mess.id)
   {
   case 0:
@@ -91,7 +93,7 @@ handle_message(struct message mess, struct peer *p)
     debug("recieved have message");
     break;
   case 5:
-    if ((handle_bitfield(mess)) != -1)
+    if (handle_bitfield(mess) < get_len(mess))
       p->am_interested = 1;
     break;
   case 7:
@@ -105,6 +107,7 @@ recieve_message(struct peer *p)
 {
   debug("recieve_message");
   struct message mess;
+  mess.payload = NULL;
   // Filling up the first part of the struct (not reading the actual message)
   if (recv(p->sfd, &mess, sizeof(struct message) - sizeof(char *), 0) < 0)
   {
@@ -116,20 +119,15 @@ recieve_message(struct peer *p)
   debug("length %u", length);
   debug("message id %u", mess.id);
 
-  if (length > 1 && length < 1000)
+  if (length > 1 && mess.id > 3)
   {
-  // Now reading the actual message
+    // Now reading the actual message
     mess.payload = malloc(length * sizeof(char));
     if (recv(p->sfd, mess.payload, length, 0) < 0)
     {
       perror("Could not read message");
       return -1;
     }
-
-    debug("payload :");
-    for (unsigned long i = 0; i < length; ++i)
-      printf("%x ", mess.payload[i]);
-    putchar('\n');
   }
 
   handle_message(mess, p);
