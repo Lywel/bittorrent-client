@@ -42,21 +42,19 @@ send_request_message(struct peer *p, int index, int begin, int length)
 }
 
 static struct message
-get_message(enum type type)
+get_message(enum type type, struct peer *p)
 {
-  uint32_t len;
   struct message mess;
   mess.payload = NULL;
   switch (type)
   {
     case INTERESTED:
-      len = htonl(1);
-      memcpy((void *)mess.len, (void *)&len, 4);
+      p->am_interested = 1;
+      set_len(1, &mess);
       mess.id = 2;
       return mess;
     default:
-      mess.id = 0;
-      break;
+      return mess;
   }
   return mess;
 }
@@ -64,6 +62,6 @@ get_message(enum type type)
 int
 send_message_type(enum type type, struct peer *p)
 {
-  struct message mess = get_message(type);
+  struct message mess = get_message(type, p);
   return send_message(&mess, sizeof(mess), p);
 }
