@@ -21,7 +21,7 @@ int
 peer_socket_init(struct peer *peer)
 {
   struct sockaddr_in *info = malloc(sizeof(struct sockaddr_in));
-  int sock = socket(AF_INET, SOCK_STREAM, 0);
+  int sock = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
 
   if (sock < 0)
   {
@@ -47,6 +47,12 @@ peer_socket_init(struct peer *peer)
 
   peer->sfd = sock;
   peer->info = info;
+  peer->am_interested = 0;
+  peer->am_choking = 1;
+  peer->peer_choking = 1;
+  peer->peer_interested = 0;
+  peer->connected = 0;
+  peer->handshaked = 0;
   return 0;
 }
 
@@ -83,9 +89,11 @@ peer_connect(struct peer *peer)
     return -1;
   }
 
-  if (connect(peer->sfd,
-             (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
+  int state = connect(peer->sfd, (struct sockaddr *)&serv_addr,
+                      sizeof(serv_addr));
+  if (state < 0 && errno != EINPROGRESS)
   {
+    perror("connect failed");
     debug("Connection failed");
     return -1;
   }

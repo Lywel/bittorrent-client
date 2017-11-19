@@ -10,10 +10,12 @@ struct peer
   struct sockaddr_in *info;
   char *ip;
   uint16_t port;
-  int am_choking;
-  int am_interested;
-  int peer_choking;
-  int peer_interested;
+  char am_choking;
+  char am_interested;
+  char peer_choking;
+  char peer_interested;
+  char handshaked;
+  char connected;
 };
 
 struct bittorent

@@ -42,6 +42,7 @@ send_handshake(struct peer *peer)
     return -1;
   }
 
+  peer->handshaked = 1;
   debug("handshaked sent: '%s'", handshake);
   return 0;
 }
@@ -67,6 +68,7 @@ recieve_handshake(struct peer *peer)
     return -1;
   }
 
+  peer->handshaked = 2;
   debug("handshake: '%*s'", HANSHAKE_S, handshake);
   return 0;
 }

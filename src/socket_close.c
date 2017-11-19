@@ -4,7 +4,7 @@
 #include "debug.h"
 
 void
-socket_close(struct peer *peer)
+peer_socket_close(struct peer *peer)
 {
   if (close(peer->sfd) < 0)
     perror("can't close socket.");

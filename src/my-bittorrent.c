@@ -1,30 +1,81 @@
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/epoll.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <fcntl.h>
 #include "bencode.h"
 #include "dump_peers.h"
 #include "debug.h"
 #include "request_tracker.h"
-#include "recieve_message.h"
-#include "handshake.h"
 #include "dico_finder.h"
 #include "socket_init.h"
+#include "socket_close.h"
+#include "network_loop.h"
 #include "client.h"
 
 struct bittorent g_bt;
 
-static int download()
+static int
+make_socket_non_blocking(int sfd)
+{
+  int flags;
+  if ((flags = fcntl(sfd, F_GETFL, 0)) < 0)
+  {
+    debug("fcntl failed");
+    return -1;
+  }
+  if (fcntl(sfd, F_SETFL, flags | O_NONBLOCK) < 0)
+  {
+    debug("fcntl failed");
+    return -1;
+  }
+  return 0;
+}
+
+static void
+init_epoll_event(struct peer *peer, int efd)
+{
+  struct epoll_event event;
+  if (peer_socket_init(peer)
+    + make_socket_non_blocking(peer->sfd)
+    + peer_connect(peer) < 0)
+  {
+    debug("FAILED : peer init / connect");
+    peer_socket_close(peer);
+    return;
+  }
+  event.data.ptr = peer;
+  event.events = EPOLLIN | EPOLLOUT | EPOLLERR | EPOLLET;
+  epoll_ctl(efd, EPOLL_CTL_ADD, peer->sfd, &event);
+  return;
+}
+
+static int
+download(void)
 {
   debug("starting download for %s", g_bt.path);
 
   get_peer_list(g_bt.torrent);
   debug("peer list is ready");
 
-  peer_socket_init(g_bt.peers[0]);
-  peer_connect(g_bt.peers[0]);
-  send_handshake(g_bt.peers[0]);
-  recieve_handshake(g_bt.peers[0]);
-  recieve_message(g_bt.peers[0]);
-  return 0;
+  int efd = epoll_create1(0);
+  if (efd < 0)
+  {
+    perror ("epoll_create");
+    return -1;
+  }
+
+  for (long long i = 0; i < 2 && g_bt.peers[i]; ++i)
+    init_epoll_event(g_bt.peers[i], efd);
+
+  struct epoll_event *events = calloc(64, sizeof(struct epoll_event));
+  int res = network_loop(efd, events);
+  free(events);
+  return res;
 }
 
 static int

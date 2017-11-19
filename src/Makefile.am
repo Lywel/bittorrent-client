@@ -21,4 +21,5 @@ my_bittorrent_SOURCES = \
   decode_binary_peers.c \
   recieve_message.c \
   client.c \
-  send_message.c
+  send_message.c \
+  network_loop.c
