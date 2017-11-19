@@ -66,7 +66,13 @@ verbose_recv(struct message mess, struct peer *p)
   else if (mess.id == 5)
     verbose_bitfield(mess);
   else if (mess.id == 6)
+    verbose("request\n");
+  else if (mess.id == 7)
     verbose("piece\n");
+  else if (mess.id == 8)
+    verbose("cancel\n");
+  else if (mess.id == 9)
+    verbose("port\n");
   else
     verbose("not supported\n");
 }
