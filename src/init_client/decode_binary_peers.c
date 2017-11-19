@@ -78,6 +78,7 @@ peer_list_init(struct be_node *node)
     g_bt.peers[i] = calloc(1, sizeof(struct peer));
     g_bt.peers[i]->ip = dico_find_str(node->val.l[i], "ip");
     g_bt.peers[i]->port = dico_find_int(node->val.l[i], "port");
+    g_bt.peers[i]->bitfield = calloc(g_bt.pieces_len, sizeof(char));
   }
   g_bt.peers = realloc(g_bt.peers, (i + 1) * sizeof(struct peer *));
   g_bt.peers[i] = NULL;

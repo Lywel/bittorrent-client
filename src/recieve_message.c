@@ -1,4 +1,5 @@
 #include <arpa/inet.h>
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
@@ -17,31 +18,15 @@ get_len(struct message mess)
   return length - 1;
 }
 
-static uint32_t
-handle_bitfield(struct message mess)
+static int
+handle_bitfield(struct message mess, struct peer *p)
 {
-  char *pieces = g_bt.pieces;
-  uint32_t index = 0;
-  uint32_t len = get_len(mess);
-
-  for (size_t i = 0; i < len; ++i)
-  {
-    char cur = mess.payload[i];
-    char have = pieces[i];
-
-    for (char j = 7; j >= 0 && index < len; --j)
-    {
-      if (!(have & (1 << j)) && (cur & (1 << j)))
-      {
-        g_bt.pieces[i] |= 1 << j;
-        debug("I am interrested in piece nb %u", index);
-        return index;
-      }
-      index++;
-    }
-  }
-
-  return index;
+  p->am_interested = 1;
+  if (g_bt.pieces_len == get_len(mess))
+    memcpy(p->bitfield, mess.payload, g_bt.pieces_len);
+  else
+    return -1;
+  return 0;
 }
 
 int
@@ -67,11 +52,10 @@ recieve_piece(struct peer *p)
   return 0;
 }
 
-static void
+static int
 handle_message(struct message mess, struct peer *p)
 {
   verbose_recv(mess, p);
-  uint32_t ret;
   switch(mess.id)
   {
   case 0:
@@ -94,16 +78,11 @@ handle_message(struct message mess, struct peer *p)
     debug("recieved have message");
     break;
   case 5:
-    if ((ret = handle_bitfield(mess)) < get_len(mess))
-    {
-      p->am_interested = 1;
-      p->piece_nb = ret;
-    }
-    break;
+    return handle_bitfield(mess, p);
   case 7:
-    debug("recieved piece");
-    break;
+    return recieve_piece(p);
   }
+  return 0;
 }
 
 int
@@ -134,7 +113,7 @@ recieve_message(struct peer *p)
     }
   }
 
-  handle_message(mess, p);
+  int ret = handle_message(mess, p);
   free(mess.payload);
-  return 1;
+  return ret;
 }

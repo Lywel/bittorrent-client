@@ -50,6 +50,7 @@ init_client(void)
   debug("torrent allocates %u char to store it", bytes);
   char *pieces = calloc(bytes, sizeof(char));
   g_bt.pieces = pieces;
+  g_bt.pieces_len = bytes;
 
   // Info hash
   s_buf *info = bencode_encode(dico_find(g_bt.torrent, "info"));

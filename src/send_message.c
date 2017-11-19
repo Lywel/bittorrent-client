@@ -16,6 +16,30 @@ set_len(uint32_t len, struct message *mess)
   memcpy((void *)mess->len, (void *)&len, 4);
 }
 
+static uint32_t
+get_interesting_piece(struct peer *p)
+{
+  // TODO : should not check the last bits of the last byte
+  uint32_t index = 0;
+  debug("looking for an interesting bit in %u bits", g_bt.pieces_len);
+  for (size_t i = 0; i < g_bt.pieces_len; ++i)
+  {
+    char cur = p->bitfield[i];
+    char have = g_bt.pieces[i];
+    for (char j = 7; j >= 0; --j)
+    {
+      if (!(have & (1 << j)) && (cur & (1 << j)))
+      {
+        //g_bt.pieces[i] |= 1 << j;
+        return index;
+      }
+      index++;
+    }
+  }
+  return -1;
+}
+
+
 int
 send_message(void *message, size_t len, struct peer *p)
 {
@@ -28,15 +52,16 @@ send_message(void *message, size_t len, struct peer *p)
 }
 
 int
-send_request_message(struct peer *p, int begin)
+send_request_message(struct peer *p)
 {
-  debug("requesting piece nb %d", p->piece_nb);
+  uint32_t index = get_interesting_piece(p);
+  debug("requesting piece nb %d", index);
   struct request req;
 
   req.id = 6;
 
-  req.index = htonl(p->piece_nb);
-  req.begin = htonl(begin);
+  req.index = htonl(index);
+  req.begin = htonl(0);
   req.length = htonl(B_SIZE);
 
   req.len[0] = 0;

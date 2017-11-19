@@ -21,6 +21,7 @@ struct peer
   char peer_choking;
   char peer_interested;
   int piece_nb;
+  char *bitfield;
   enum peer_status status;
 };
 
@@ -29,6 +30,7 @@ struct bittorent
   char verbose;
   char *path;
   char *pieces;
+  uint32_t pieces_len;
   struct be_node *torrent;
   struct peer **peers;
   char *info_hash;

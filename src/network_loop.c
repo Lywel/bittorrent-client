@@ -71,11 +71,8 @@ network_loop(int efd, struct epoll_event *events)
           peer->status = P_CO;
           send_handshake(peer);
         }
-      }
-      if (!peer->am_choking && peer->am_interested)
-      {
-        send_request_message(peer, 0);
-        recieve_piece(peer);
+        if (!peer->am_choking && peer->am_interested)
+          send_request_message(peer);
       }
     }
   }
