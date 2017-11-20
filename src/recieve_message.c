@@ -114,6 +114,7 @@ handle_message(struct message mess, struct peer *p)
   case 7:
     return recieve_piece(mess, p);
   default:
+    debug("recieved continuation data");
     return recieve_data(mess, p);
   }
   return 0;

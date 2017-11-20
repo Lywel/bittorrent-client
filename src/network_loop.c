@@ -69,8 +69,7 @@ network_loop(int efd, struct epoll_event *events)
           peer->status = P_CO;
           send_handshake(peer);
         }
-        if (!peer->am_choking && peer->am_interested
-         && peer->downloading == -1)
+        if (!peer->am_choking && peer->am_interested && peer->downloaded)
           send_request_message(peer);
       }
     }

@@ -45,6 +45,7 @@ send_message(void *message, size_t len, struct peer *p)
 int
 send_request_message(struct peer *p)
 {
+  p->downloaded = 0;
   uint32_t index;
   if (p->downloading < 0)
     index = get_interesting_piece(p);
