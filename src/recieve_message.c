@@ -1,7 +1,6 @@
 #include <arpa/inet.h>
 #include <string.h>
 #include <stdio.h>
-#include <unistd.h>
 #include <stdlib.h>
 #include <sys/socket.h>
 #include "debug.h"
@@ -27,7 +26,7 @@ handle_bitfield(struct message mess, struct peer *p)
   if (!bitfield)
     return -1;
 
-  if (pread(p->sfd, bitfield, mess.len - 1, sizeof(struct message)) < 0)
+  if (recv(p->sfd, bitfield, mess.len - 1, 0) < 0)
   {
     perror("Could not read bitfield");
     return -1;
@@ -54,7 +53,7 @@ recieve_piece(struct message mess, struct peer *p)
   // send HAVE to peers
   uint32_t blk_len = mess.len - 8;
   struct piece piece;
-  if (pread(p->sfd, &piece, sizeof(struct piece), sizeof(struct message)) < 0)
+  if (recv(p->sfd, &piece, sizeof(struct piece), 0) < 0)
   {
     perror("receive_piece : could not read message");
     return -1;
@@ -65,8 +64,7 @@ recieve_piece(struct message mess, struct peer *p)
   char buf[4094];
   ssize_t read = 0;
   ssize_t offset = 0;
-  while ((read = pread(p->sfd, buf, 1024,
-          offset + sizeof(struct message) + sizeof(struct piece))) > 0)
+  while ((read = recv(p->sfd, buf, 1024, 0)) > 0)
   {
     debug("bytes %d to %d:", offset, offset + read);
     fwrite(buf, 1, read, stdout);
@@ -116,7 +114,7 @@ recieve_message(struct peer *p)
   debug("recieve_message");
   struct message mess;
 
-  if (recv(p->sfd, &mess, sizeof(struct message), MSG_PEEK) < 0)
+  if (recv(p->sfd, &mess, sizeof(struct message), 0) < 0)
   {
     perror("Could not read header");
     return -1;
