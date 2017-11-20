@@ -81,7 +81,6 @@ recieve_piece(struct message mess, struct peer *p)
   debug("recieving block %u of size %u beggining at %u",
     ntohl(piece.index), blk_len, ntohl(piece.begin));
 
-<<<<<<< HEAD
   char buf[4094];
   ssize_t read = 0;
   ssize_t offset = 0;
