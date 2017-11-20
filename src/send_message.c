@@ -5,13 +5,6 @@
 #include "recieve_message.h"
 #include "debug.h"
 
-static void
-set_len(uint32_t len, struct message *mess)
-{
-  len = htonl(len);
-  memcpy((void *)mess->len, (void *)&len, 4);
-}
-
 static uint32_t
 get_interesting_piece(struct peer *p)
 {
@@ -68,11 +61,7 @@ send_request_message(struct peer *p)
   req.index = htonl(index);
   req.begin = htonl(p->offset);
   req.length = htonl(B_SIZE);
-
-  req.len[0] = 0;
-  req.len[1] = 0;
-  req.len[2] = 0;
-  req.len[3] = 13;
+  req.len = htonl(13);
 
   p->offset += B_SIZE;
 
@@ -86,30 +75,31 @@ static struct message
 get_message(enum type type, struct peer *p)
 {
   struct message mess;
-  mess.payload = NULL;
   switch (type)
   {
     case INTERESTED:
       p->am_interested = 1;
-      set_len(1, &mess);
+      mess.len = htonl(1);
       mess.id = 2;
       return mess;
     case NOT_INTERESTED:
       p->am_interested = 0;
-      set_len(1, &mess);
+      mess.len = htonl(1);
       mess.id = 3;
       return mess;
     case CHOKE:
       p->peer_choking = 1;
-      set_len(1, &mess);
+      mess.len = htonl(1);
       mess.id = 0;
       return mess;
     case UNCHOKE:
       p->peer_choking = 0;
-      set_len(1, &mess);
+      mess.len = htonl(1);
       mess.id = 1;
       return mess;
     default:
+      mess.len = htonl(-1);
+      mess.id = -1;
       return mess;
   }
 }

@@ -5,23 +5,42 @@
 #include <sys/socket.h>
 #include "debug.h"
 
-static uint32_t
-get_len(struct message mess)
+static void
+verbose_bitfield(uint32_t len, char *bytes)
 {
-  uint32_t *lenn = (uint32_t *)mess.len;
-  uint32_t length = ntohl(*lenn);
-  return length - 1;
+  for (size_t i = 0; i < len; ++i)
+  {
+    char cur = bytes[i];
+    for (char j = 7; j >= 0; --j)
+      verbose("%u", !!((1 << j) & cur));
+  }
+  verbose("\n");
 }
 
 static int
 handle_bitfield(struct message mess, struct peer *p)
 {
-  p->am_interested = 1;
-  if (g_bt.pieces_len == get_len(mess))
-    memcpy(p->bitfield, mess.payload, g_bt.pieces_len);
-  else
+  if (mess.len - 1 > g_bt.pieces_len)
     return -1;
-  return 0;
+  char *bitfield = malloc((mess.len - 1) * sizeof(char));
+  if (!bitfield)
+    return -1;
+
+  if (recv(p->sfd, bitfield, mess.len - 1, 0) < 0)
+  {
+    perror("Could not read bitfield");
+    return -1;
+  }
+  p->am_interested = 1;
+
+  if (g_bt.pieces_len == mess.len - 1)
+  {
+    memcpy(p->bitfield, bitfield, g_bt.pieces_len);
+    verbose_bitfield(mess.len - 1, bitfield);
+  }
+  free(bitfield);
+
+  return -1 * !!(g_bt.pieces_len != mess.len - 1);
 }
 
 int
@@ -32,24 +51,28 @@ recieve_piece(struct message mess, struct peer *p)
   // compare checksum to expected one
   // if ok, write to disk
   // send HAVE to peers
-  int size_recv = 0;
-  int total_size = 0;
-  char chunk[B_SIZE];
-  (void)mess;
-  debug("recieving piece n°%d at offset %d", p->downloading, p->offset);
-  while(1)
+  uint32_t blk_len = mess.len - 8;
+  struct piece piece;
+  if (recv(p->sfd, &piece, sizeof(struct piece), 0) < 0)
   {
-    memset(chunk ,0 , B_SIZE);
-    if((size_recv = recv(p->sfd, chunk, B_SIZE, 0)) < 0)
-      break;
-    else
-    {
-      total_size += size_recv;
-      printf("%s" , chunk);
-    }
+    perror("receive_piece : could not read message");
+    return -1;
   }
-  p->downloaded = 1;
-  return total_size;
+  debug("recieving block %u of size %u beggining at %u",
+    ntohl(piece.index), blk_len, ntohl(piece.begin));
+
+  char buf[4094];
+  ssize_t read = 0;
+  ssize_t offset = 0;
+  while ((read = recv(p->sfd, buf, 1024, 0)) > 0)
+  {
+    debug("bytes %d to %d:", offset, offset + read);
+    fwrite(buf, 1, read, stdout);
+    puts("");
+    offset += read;
+    //write_file(buf, len, p->req_blk, p->req_offset);
+  }
+  return 0;
 }
 
 static int
@@ -93,30 +116,15 @@ recieve_message(struct peer *p)
 {
   debug("recieve_message");
   struct message mess;
-  mess.payload = NULL;
-  // Filling up the first part of the struct (not reading the actual message)
-  if (recv(p->sfd, &mess, sizeof(struct message) - sizeof(char *), 0) < 0)
+
+  if (recv(p->sfd, &mess, sizeof(struct message), 0) < 0)
   {
     perror("Could not read header");
     return -1;
   }
-
-  uint32_t length = get_len(mess);
-  debug("length %u", length);
+  mess.len = ntohl(mess.len);
+  debug("length %u", mess.len);
   debug("message id %u", mess.id);
 
-  if (length > 1 && mess.id > 3)
-  {
-    // Now reading the actual message
-    mess.payload = malloc(length * sizeof(char));
-    if (recv(p->sfd, mess.payload, length, 0) < 0)
-    {
-      perror("Could not read message");
-      return -1;
-    }
-  }
-
-  int ret = handle_message(mess, p);
-  free(mess.payload);
-  return ret;
+  return handle_message(mess, p);
 }

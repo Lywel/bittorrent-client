@@ -41,13 +41,12 @@ network_loop(int efd, struct epoll_event *events)
       perror("epoll wait timedout");
       continue;
     }
-    debug("event_wait return %d events", n);
 
     for (int i = 0; i < n; ++i)
     {
       struct epoll_event evt = events[i];
       if ((evt.events & EPOLLERR) || (evt.events & EPOLLRDHUP)
-          || (evt.events & EPOLLHUP))
+       || (evt.events & EPOLLHUP))
       {
         debug("peer droped the connection");
         peer_socket_close(evt.data.ptr);

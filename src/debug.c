@@ -31,27 +31,12 @@ verbose(char *fmt, ...)
   va_end(args);
 }
 
-static void
-verbose_bitfield(struct message mess)
-{
-  verbose("bitfield ");
-  uint32_t len = ntohl(*(uint32_t *)mess.len) - 1;
-  for (size_t i = 0; i < len; ++i)
-  {
-    char cur = mess.payload[i];
-    for (char j = 7; j >= 0; --j)
-      verbose("%u", !!((1 << j) & cur));
-  }
-  verbose("\n");
-}
-
 void
 verbose_recv(struct message mess, struct peer *p)
 {
   verbose("%x%x%x: msg: recv: %s:%u ", (uint8_t)g_bt.info_hash[0],
           (uint8_t)g_bt.info_hash[1], (uint8_t)g_bt.info_hash[2],
           p->ip, p->port);
-  fflush(stdout);
   if (mess.id == 0)
     verbose("choke\n");
   else if (mess.id == 1)
@@ -63,7 +48,7 @@ verbose_recv(struct message mess, struct peer *p)
   else if (mess.id == 4)
     verbose("have\n");
   else if (mess.id == 5)
-    verbose_bitfield(mess);
+    verbose("bitfield ");
   else if (mess.id == 6)
     verbose("request\n");
   else if (mess.id == 7)
