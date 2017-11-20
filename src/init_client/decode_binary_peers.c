@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <arpa/inet.h>
-#include "client.h"
 #include "debug.h"
 #include "dico_finder.h"
 #include "bencode.h"

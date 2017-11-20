@@ -3,12 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
-#include <stdint.h>
-#include "message.h"
-#include "client.h"
 #include "debug.h"
-#include "recieve_message.h"
-#include "send_message.h"
 
 static uint32_t
 get_len(struct message mess)

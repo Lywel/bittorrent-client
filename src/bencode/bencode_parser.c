@@ -1,7 +1,5 @@
 #include <stdlib.h>
 #include <string.h>
-#include "debug.h"
-#include "buffer.h"
 #include "bencode.h"
 #include "bencode_parser.h"
 

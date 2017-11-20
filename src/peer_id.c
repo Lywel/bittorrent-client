@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <string.h>
-#include <stddef.h>
 
 char *
 generate_peer_id(void)

@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "bencode.h"
-#include "bencode_parser.h"
 #include "bencode_json.h"
 
 static void

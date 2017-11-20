@@ -1,12 +1,8 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <string.h>
-#include <stdint.h>
 #include <stdio.h>
 #include "recieve_message.h"
-#include "client.h"
-#include "message.h"
-#include "send_message.h"
 #include "debug.h"
 
 static void
@@ -30,7 +26,7 @@ get_interesting_piece(struct peer *p)
     {
       if (!(have & (1 << j)) && (cur & (1 << j)))
       {
-        //g_bt.pieces[i] |= 1 << j;
+        g_bt.pieces[i] |= 1 << j;
         return index;
       }
       index++;

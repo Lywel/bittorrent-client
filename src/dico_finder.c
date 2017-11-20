@@ -1,7 +1,5 @@
 #include <string.h>
 #include "bencode.h"
-#include "bencode_parser.h"
-#include "dico_finder.h"
 
 struct be_node *
 dico_find(struct be_node *node, const char *key)

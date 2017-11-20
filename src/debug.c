@@ -4,8 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "debug.h"
-#include "message.h"
-#include "client.h"
 
 void
 debug(char *fmt, ...)

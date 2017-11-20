@@ -2,15 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <curl/curl.h>
-#include <math.h>
-#include "buffer.h"
 #include "bencode.h"
 #include "dico_finder.h"
 #include "debug.h"
 #include "decode_binary_peers.h"
-#include "socket_init.h"
-#include "client.h"
-#include "get_peer_list.h"
 
 static char *
 build_tracker_uri(struct be_node *dico, CURL *curl)

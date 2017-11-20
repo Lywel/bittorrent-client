@@ -1,10 +1,8 @@
 #include <openssl/sha.h>
 #include <stdlib.h>
-#include "buffer.h"
 #include "debug.h"
 #include "peer_id.h"
 #include "bencode.h"
-#include "client.h"
 #include "dico_finder.h"
 
 static char *

@@ -1,11 +1,6 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <sys/epoll.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #include <fcntl.h>
 #include "bencode.h"
 #include "bencode_json.h"
@@ -15,7 +10,6 @@
 #include "socket_init.h"
 #include "socket_close.h"
 #include "network_loop.h"
-#include "client.h"
 
 struct bittorent g_bt;
 

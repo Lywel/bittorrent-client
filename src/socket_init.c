@@ -2,17 +2,12 @@
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <stdio.h>
-#include <string.h>
 #include <strings.h>
 #include <errno.h>
-#include <unistd.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include "client.h"
-#include "socket_init.h"
 #include "debug.h"
-#include "dico_finder.h"
 
 /**
  * init a new socket and returns its file descriptor

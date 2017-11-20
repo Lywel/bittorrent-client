@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include <string.h>
 #include "buffer.h"
 
 s_buf *buffer_init(char *str, long long size)

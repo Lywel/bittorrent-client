@@ -1,11 +1,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <sys/socket.h>
-#include "client.h"
 #include "debug.h"
-#include "socket_close.h"
-#include "socket_init.h"
-#include "dico_finder.h"
 
 #define HANSHAKE_S 68
 #define RESERVED_S 8

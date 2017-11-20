@@ -2,10 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "buffer.h"
-#include "client.h"
 #include "bencode.h"
-#include "bencode_json.h"
 #include "bencode_parser.h"
 
 struct be_node *
