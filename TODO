@@ -43,5 +43,8 @@
 [x] get right port of socket for handshake with socketname
 [x] Create the global structure
 [x] Create the download loop
-[x] set socket timout https://stackoverflow.com/questions/4181784/how-to-set-socket-timeout-in-c-when-making-multiple-connections
+[x] set socket timout
 [ ] Remove the limit of 2 peers in my-bittorent.c : download :72 (i < 2)
+[ ] handle multifile
+[ ] coding style
+[ ] make executable in current folder

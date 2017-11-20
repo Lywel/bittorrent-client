@@ -27,6 +27,8 @@ get_interesting_piece(struct peer *p)
       if (!(have & (1 << j)) && (cur & (1 << j)))
       {
         g_bt.pieces[i] |= 1 << j;
+        p->downloading = index;
+        p->offset = 0;
         return index;
       }
       index++;
@@ -50,20 +52,31 @@ send_message(void *message, size_t len, struct peer *p)
 int
 send_request_message(struct peer *p)
 {
-  uint32_t index = get_interesting_piece(p);
-  debug("requesting piece nb %d", index);
+  uint32_t index;
+  if (p->downloading < 0)
+    index = get_interesting_piece(p);
+  else
+    index = p->downloading;
+
+  debug("requesting piece nb %d with an offset of %d", index, p->offset);
+
   struct request req;
 
   req.id = 6;
 
   req.index = htonl(index);
-  req.begin = htonl(0);
+  req.begin = htonl(p->offset);
   req.length = htonl(B_SIZE);
 
   req.len[0] = 0;
   req.len[1] = 0;
   req.len[2] = 0;
   req.len[3] = 13;
+
+  p->offset += B_SIZE;
+
+  if (p->offset >= g_bt.piece_size)
+    p->downloading = -1;
 
   return send_message(&req, sizeof(req), p);
 }

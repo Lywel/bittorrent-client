@@ -41,13 +41,16 @@ init_client(void)
   // Bencode parsing
   g_bt.torrent = bencode_file_decode(g_bt.path);
 
+  struct be_node *info_dic = dico_find(g_bt.torrent, "info");
   // Keeping track of downloaded pieces
-  uint32_t pieces_nb = dico_find(dico_find(g_bt.torrent, "info"), "pieces")->val.s->len / 20;
-  debug("torrent has %u pieces", pieces_nb);
+  uint32_t pieces_nb = dico_find(info_dic, "pieces")->val.s->len / 20;
+  uint32_t piece_size = dico_find_int(info_dic, "piece length");
+  debug("torrent has %u pieces of size %u", pieces_nb, piece_size);
   uint32_t bytes = pieces_nb / 8 + !!(pieces_nb % 8);
   debug("torrent allocates %u char to store it", bytes);
   char *pieces = calloc(bytes, sizeof(char));
   g_bt.pieces = pieces;
+  g_bt.piece_size = piece_size;
   g_bt.pieces_len = bytes;
 
   // Info hash
