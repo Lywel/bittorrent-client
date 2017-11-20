@@ -41,13 +41,12 @@ network_loop(int efd, struct epoll_event *events)
       perror("epoll wait timedout");
       continue;
     }
-    debug("event_wait return %d events", n);
 
     for (int i = 0; i < n; ++i)
     {
       struct epoll_event evt = events[i];
       if ((evt.events & EPOLLERR) || (evt.events & EPOLLRDHUP)
-          || (evt.events & EPOLLHUP))
+       || (evt.events & EPOLLHUP))
       {
         debug("peer droped the connection");
         peer_socket_close(evt.data.ptr);
@@ -70,7 +69,8 @@ network_loop(int efd, struct epoll_event *events)
           peer->status = P_CO;
           send_handshake(peer);
         }
-        if (!peer->am_choking && peer->am_interested)
+        if (!peer->am_choking && peer->am_interested
+         && peer->downloading == -1)
           send_request_message(peer);
       }
     }
