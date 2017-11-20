@@ -46,7 +46,8 @@ network_loop(int efd, struct epoll_event *events)
     for (int i = 0; i < n; ++i)
     {
       struct epoll_event evt = events[i];
-      if ((evt.events & EPOLLERR) || (evt.events & EPOLLRDHUP)|| (evt.events & EPOLLHUP))
+      if ((evt.events & EPOLLERR) || (evt.events & EPOLLRDHUP)
+          || (evt.events & EPOLLHUP))
       {
         debug("peer droped the connection");
         peer_socket_close(evt.data.ptr);

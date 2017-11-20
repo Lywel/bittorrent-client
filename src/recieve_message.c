@@ -33,9 +33,9 @@ recieve_piece(struct message mess, struct peer *p)
   // if ok, write to disk
   // send HAVE to peers
   p = p;
-  uint32_t len = get_len(mess);
+  uint32_t len = get_len(mess) - 8;
   for (uint32_t i = 0; i < len; ++i)
-    putchar(mess.payload[i]);
+     printf("%c", mess.payload[i]);
   return 0;
 }
 

@@ -51,6 +51,7 @@ verbose_recv(struct message mess, struct peer *p)
   verbose("%x%x%x: msg: recv: %s:%u ", (uint8_t)g_bt.info_hash[0],
           (uint8_t)g_bt.info_hash[1], (uint8_t)g_bt.info_hash[2],
           p->ip, p->port);
+  fflush(stdout);
   if (mess.id == 0)
     verbose("choke\n");
   else if (mess.id == 1)
