@@ -32,13 +32,15 @@
 [x] Rename get_sha1 to compute_sha1()
 [ ] handle verbose option
   [x] tracker request
-  [ ] peer connection/disconnection
+  [x] peer connection/disconnection
   [x] peer messages
+  [ ] verbose have
+  [ ] other verbose
 [ ] getname for dump peers
-[ ] Create the global structure
-[ ] Create the download loop
-[ ] set socket timout https://stackoverflow.com/questions/4181784/how-to-set-socket-timeout-in-c-when-making-multiple-connections
-[ ] get right port of socket for handshake with socketname
+[x] Create the global structure
+[x] Create the download loop
+[x] set socket timout https://stackoverflow.com/questions/4181784/how-to-set-socket-timeout-in-c-when-making-multiple-connections
+[x] get right port of socket for handshake with socketname
 [x] Create the global structure
 [x] Create the download loop
 [x] set socket timout https://stackoverflow.com/questions/4181784/how-to-set-socket-timeout-in-c-when-making-multiple-connections
