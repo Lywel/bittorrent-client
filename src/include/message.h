@@ -7,14 +7,13 @@
 
 struct __attribute__((__packed__)) message
 {
-    unsigned char len[4];
+    uint32_t len;
     uint8_t id;
-    unsigned char *payload;
 };
 
 struct __attribute__((__packed__)) request
 {
-  unsigned char len[4];
+  uint32_t len;
   uint8_t id;
   int index;
   int begin;
@@ -23,11 +22,8 @@ struct __attribute__((__packed__)) request
 
 struct __attribute__((__packed__)) piece
 {
-  unsigned char len[4];
-  uint8_t id;
   int index;
   int begin;
-  unsigned char *block;
 };
 
 #endif
