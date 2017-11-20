@@ -72,6 +72,7 @@ recieve_piece(struct message mess, struct peer *p)
     offset += read;
     //write_file(buf, len, p->req_blk, p->req_offset);
   }
+  p->downloaded = 1;
   return 0;
 }
 
