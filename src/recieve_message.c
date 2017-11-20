@@ -51,7 +51,7 @@ recieve_data(struct message mess, struct peer *p)
 
   char buf[4094];
   ssize_t read = 0;
-  ssize_t offset = 0;
+  ssize_t offset = (mess.id != 7) * sizeof(struct message);
   while ((read = recv(p->sfd, buf, 1024, 0)) > 0)
   {
     debug("bytes %d to %d:", offset, offset + read);
