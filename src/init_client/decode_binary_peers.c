@@ -81,6 +81,7 @@ peer_list_init(struct be_node *node)
     g_bt.peers[i]->bitfield = calloc(g_bt.pieces_len, sizeof(char));
     g_bt.peers[i]->offset = 0;
     g_bt.peers[i]->downloading = -1;
+    g_bt.peers[i]->downloaded = 1;
   }
   g_bt.peers = realloc(g_bt.peers, (i + 1) * sizeof(struct peer *));
   g_bt.peers[i] = NULL;

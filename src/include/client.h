@@ -24,6 +24,7 @@ struct peer
   uint32_t offset;
   char *bitfield;
   char downloading;
+  char downloaded;
   enum peer_status status;
 };
 

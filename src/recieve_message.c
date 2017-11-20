@@ -32,11 +32,24 @@ recieve_piece(struct message mess, struct peer *p)
   // compare checksum to expected one
   // if ok, write to disk
   // send HAVE to peers
-  p = p;
-  uint32_t len = get_len(mess) - 8;
-  for (uint32_t i = 0; i < len; ++i)
-     printf("%c", mess.payload[i]);
-  return 0;
+  int size_recv = 0;
+  int total_size = 0;
+  char chunk[B_SIZE];
+  (void)mess;
+  debug("recieving piece n°%d at offset %d", p->downloading, p->offset);
+  while(1)
+  {
+    memset(chunk ,0 , B_SIZE);
+    if((size_recv = recv(p->sfd, chunk, B_SIZE, 0)) < 0)
+      break;
+    else
+    {
+      total_size += size_recv;
+      printf("%s" , chunk);
+    }
+  }
+  p->downloaded = 1;
+  return total_size;
 }
 
 static int
@@ -67,6 +80,9 @@ handle_message(struct message mess, struct peer *p)
   case 5:
     return handle_bitfield(mess, p);
   case 7:
+    return recieve_piece(mess, p);
+  default:
+    debug("recieved continuation data");
     return recieve_piece(mess, p);
   }
   return 0;
