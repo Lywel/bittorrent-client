@@ -43,7 +43,27 @@ handle_bitfield(struct message mess, struct peer *p)
   return -1 * !!(g_bt.pieces_len != mess.len - 1);
 }
 
-int
+static int
+recieve_data(struct message mess, struct peer *p)
+{
+  if (mess.id != 7)
+    fwrite(&mess, 1, sizeof(struct message), stdout);
+
+  char buf[4094];
+  ssize_t read = 0;
+  ssize_t offset = 0;
+  while ((read = recv(p->sfd, buf, 1024, 0)) > 0)
+  {
+    debug("bytes %d to %d:", offset, offset + read);
+    fwrite(buf, 1, read, stdout);
+    puts("");
+    offset += read;
+    //write_file(buf, len, p->req_blk, p->req_offset);
+  }
+  return read;
+}
+
+static int
 recieve_piece(struct message mess, struct peer *p)
 {
   // verify if we finished a block
@@ -61,6 +81,7 @@ recieve_piece(struct message mess, struct peer *p)
   debug("recieving block %u of size %u beggining at %u",
     ntohl(piece.index), blk_len, ntohl(piece.begin));
 
+<<<<<<< HEAD
   char buf[4094];
   ssize_t read = 0;
   ssize_t offset = 0;
@@ -73,7 +94,7 @@ recieve_piece(struct message mess, struct peer *p)
     //write_file(buf, len, p->req_blk, p->req_offset);
   }
   p->downloaded = 1;
-  return 0;
+  return recieve_data(mess, p);
 }
 
 static int
@@ -107,7 +128,7 @@ handle_message(struct message mess, struct peer *p)
     return recieve_piece(mess, p);
   default:
     debug("recieved continuation data");
-    return recieve_piece(mess, p);
+    return recieve_data(mess, p);
   }
   return 0;
 }
