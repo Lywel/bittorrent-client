@@ -53,9 +53,18 @@ init_client(void)
   g_bt.pieces_len = bytes;
 
   // Info hash
-  s_buf *info = bencode_encode(dico_find(g_bt.torrent, "info"));
-  g_bt.info_hash = compute_sha1(info);
-  buffer_free(info);
+  struct be_node *info = dico_find(g_bt.torrent, "info");
+  s_buf *info_be = bencode_encode(info);
+  g_bt.info_hash = compute_sha1(info_be);
+  buffer_free(info_be);
+
+  struct be_node *files = dico_find(info, "files");
+  if (!files)
+  {
+    char *path = dico_find_str(info, "name");
+    FILE *f = fopen(path, "w");
+    fclose(f);
+  }
 }
 
 void

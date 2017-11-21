@@ -30,7 +30,9 @@ write_data(void *data, struct peer *p, uint32_t len)
     path = dico_find_str(info, "name");
   else
     path = NULL;
-  FILE *f = fopen(path, "a");
+  if (p->downloading < 0)
+    return;
+  FILE *f = fopen(path, "r+");
   fseek(f, p->downloading * g_bt.piece_size + p->offset, SEEK_SET);
   fwrite(data, 1, len, f);
   fclose(f);
