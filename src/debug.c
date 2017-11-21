@@ -38,7 +38,12 @@ verbose_recv(struct message mess, struct peer *p)
           (uint8_t)g_bt.info_hash[1], (uint8_t)g_bt.info_hash[2],
           p->ip, p->port);
   if (mess.id == 0)
-    verbose("choke\n");
+  {
+    if (mess.len)
+      verbose("choke\n");
+    else
+      verbose("keep alive\n");
+  }
   else if (mess.id == 1)
     verbose("unchoke\n");
   else if (mess.id == 2)
@@ -48,7 +53,12 @@ verbose_recv(struct message mess, struct peer *p)
   else if (mess.id == 4)
     verbose("have\n");
   else if (mess.id == 5)
-    verbose("bitfield ");
+  {
+    if (g_bt.pieces_len == mess.len - 1)
+      verbose("bitfield ");
+    else
+      verbose("piece continuation\n");
+  }
   else if (mess.id == 6)
     verbose("request\n");
   else if (mess.id == 7)
