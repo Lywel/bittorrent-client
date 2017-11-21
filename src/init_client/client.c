@@ -23,9 +23,7 @@ update_sha1(struct peer *p, char *buf, unsigned int len)
     mdctx = p->mdctx;
 
   EVP_DigestInit_ex(mdctx, EVP_sha1(), NULL);
-  p->digest = (unsigned char *)OPENSSL_malloc(EVP_MD_size(EVP_sha1()));
   EVP_DigestUpdate(mdctx, buf, len);
-  EVP_DigestFinal_ex(mdctx, p->digest, &len);
 }
 
 void

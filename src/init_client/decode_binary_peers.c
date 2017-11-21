@@ -83,9 +83,7 @@ peer_list_init(struct be_node *node)
     g_bt.peers[i]->downloading = -1;
     g_bt.peers[i]->last_block = 0;
     g_bt.peers[i]->mdctx = NULL;
-    g_bt.peers[i]->digest = malloc(20);
-    g_bt.peers[i]->
-    last_piece_download_is_finished_and_we_have_to_request_a_new_one = 1;
+    g_bt.peers[i]->downloaded = 1;
   }
 
   g_bt.peers = realloc(g_bt.peers, (i + 1) * sizeof(struct peer *));

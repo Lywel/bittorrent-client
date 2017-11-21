@@ -49,7 +49,7 @@ send_request_message(struct peer *p)
     p->downloading = get_interesting_piece(p);
 
   debug("requesting piece nb %d with an offset of %d", p->downloading, p->offset);
-  p->last_piece_download_is_finished_and_we_have_to_request_a_new_one = 0;
+  p->downloaded = 0;
 
   struct request req;
   req.id = 6;
