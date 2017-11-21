@@ -101,6 +101,8 @@ get_peer_list_from_tracker(struct be_node *dico)
     peer_list = bencode_decode(data->str, data->len);
     buffer_free(data);
   }
+  else
+    fprintf(stderr, "curl failed: %s\n", curl_easy_strerror(res));
   curl_easy_cleanup(curl);
 
   struct be_node *peers = dico_find(peer_list, "peers");
