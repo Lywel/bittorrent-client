@@ -6,6 +6,7 @@
 #include "debug.h"
 #include "bencode.h"
 #include "dico_finder.h"
+#include "socket_close.h"
 
 static uint32_t
 get_interesting_piece(struct peer *p)
@@ -50,7 +51,11 @@ send_request_message(struct peer *p)
 {
   if (p->downloading < 0)
     p->downloading = get_interesting_piece(p);
-
+  if (p->downloading < 0)
+  {
+    peer_socket_close(p);
+    return -1;
+  }
   debug("requesting piece nb %d with an offset of %d", p->downloading, p->offset);
   p->downloaded = 0;
 
