@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include "recieve_message.h"
 #include "debug.h"
+#include "bencode.h"
+#include "dico_finder.h"
 #include "socket_close.h"
 
 static uint32_t
@@ -11,8 +13,10 @@ get_interesting_piece(struct peer *p)
 {
   // TODO : should not check the last bits of the last byte
   uint32_t index = 0;
+  struct be_node *info_dic = dico_find(g_bt.torrent, "info");
+  uint32_t pieces_nb = dico_find(info_dic, "pieces")->val.s->len / 20;
   debug("looking for an interesting bit in %u bits", g_bt.pieces_len);
-  for (size_t i = 0; i < g_bt.pieces_len; ++i)
+  for (size_t i = 0; i < g_bt.pieces_len && index < pieces_nb; ++i)
   {
     char cur = p->bitfield[i];
     char have = g_bt.pieces[i];
@@ -30,7 +34,6 @@ get_interesting_piece(struct peer *p)
   }
   return -1;
 }
-
 
 int
 send_message(void *message, size_t len, struct peer *p)
