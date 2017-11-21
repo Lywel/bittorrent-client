@@ -28,6 +28,7 @@ struct peer
   unsigned char *digest;
   EVP_MD_CTX *mdctx;
   int downloading;
+  char last_piece_download_is_finished_and_we_have_to_request_a_new_one;
   enum peer_status status;
 };
 

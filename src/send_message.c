@@ -45,19 +45,15 @@ send_message(void *message, size_t len, struct peer *p)
 int
 send_request_message(struct peer *p)
 {
-  uint32_t index;
   if (p->downloading < 0)
-    index = get_interesting_piece(p);
-  else
-    index = p->downloading;
+    p->downloading = get_interesting_piece(p);
 
-  debug("requesting piece nb %d with an offset of %d", index, p->offset);
+  debug("requesting piece nb %d with an offset of %d", p->downloading, p->offset);
+  p->last_piece_download_is_finished_and_we_have_to_request_a_new_one = 0;
 
   struct request req;
-
   req.id = 6;
-
-  req.index = htonl(index);
+  req.index = htonl(p->downloading);
   req.begin = htonl(p->offset);
   req.length = htonl(B_SIZE);
   req.len = htonl(13);

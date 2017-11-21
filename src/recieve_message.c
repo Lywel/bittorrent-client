@@ -60,6 +60,7 @@ recieve_data(struct message mess, struct peer *p)
       p->offset / B_SIZE, g_bt.piece_size / B_SIZE);
     p->last_block += B_SIZE;
     p->offset = p->last_block;
+    p->last_piece_download_is_finished_and_we_have_to_request_a_new_one = 1;
   }
   if (p->offset >= g_bt.piece_size)
   {

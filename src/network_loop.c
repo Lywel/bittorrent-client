@@ -70,7 +70,7 @@ network_loop(int efd, struct epoll_event *events)
           send_handshake(peer);
         }
         if (!peer->am_choking && peer->am_interested
-          && peer->offset >= peer->last_block)
+    && peer->last_piece_download_is_finished_and_we_have_to_request_a_new_one)
           send_request_message(peer);
       }
     }
