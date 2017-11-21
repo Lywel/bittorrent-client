@@ -13,22 +13,21 @@ compute_sha1(s_buf *info)
   return (char *)hash;
 }
 
-/*
 void
-compute_sha1(s_buf *info, unsigned char **digest)
+update_sha1(struct peer *p, char *buf, unsigned int len)
 {
   EVP_MD_CTX *mdctx;
-  unsigned int len = 20;
+  if (!p->mdctx)
+  {
+    mdctx = EVP_MD_CTX_create();
+    EVP_DigestInit_ex(mdctx, EVP_sha1(), NULL);
+  }
+  else
+    mdctx = p->mdctx;
 
-  mdctx = EVP_MD_CTX_create();
-  EVP_DigestInit_ex(mdctx, EVP_sha1(), NULL);
-  *digest = (unsigned char *)OPENSSL_malloc(EVP_MD_size(EVP_sha1()));
-  EVP_DigestUpdate(mdctx, info->str, info->len);
-  EVP_DigestFinal_ex(mdctx, *digest, &len);
-
-  EVP_MD_CTX_destroy(mdctx);
+  EVP_DigestUpdate(mdctx, buf, len);
+  p->mdctx = mdctx;
 }
-*/
 
 void
 init_client(void)

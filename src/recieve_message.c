@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <sys/socket.h>
 #include "debug.h"
+#include "recieve_message.h"
 #include "dico_finder.h"
 #include "buffer.h"
 
@@ -36,18 +37,21 @@ write_data(void *data, struct peer *p, uint32_t len)
 }
 
 static void
-verify_piece(uint32_t id)
+verify_piece(struct peer *p)
 {
-  id = id;
-  // struct be_node *info_dic = dico_find(g_bt.torrent, "info");
-  // s_buf *pieces_hash = dico_find_str(info_dic, "pieces")->val.s;
-  // TODO:
-  // Compute hash while recieveing the data from the peer
-  // And store it on the peer struct
-  // Then we just have to compare it here with the expected hash
-  // if it doesnt match we unset the corecpondding piece byte
-  //
-  // if (strncmp(pieces_hash->str + id * 20, )
+  unsigned int len = 0;
+  unsigned char final_hash[20];
+  EVP_DigestFinal_ex(p->mdctx, final_hash, &len);
+  struct be_node *info_dic = dico_find(g_bt.torrent, "info");
+  char *pieces_hash = dico_find_str(info_dic, "pieces");
+  if (memcmp(pieces_hash + p->downloading * 20, final_hash, 20))
+  {
+    printf("PIECE NB %d VERIFIED :)\n", p->downloading);
+    EVP_MD_CTX_destroy(p->mdctx);
+    p->mdctx = NULL;
+  }
+  else
+    printf("PIECE NB %d NOT VERIFIED :(\n", p->downloading);
 }
 
 static int
@@ -65,6 +69,7 @@ recieve_data(struct message mess, struct peer *p)
   ssize_t read = 0;
   while ((read = recv(p->sfd, buf, B_SIZE, 0)) > 0)
   {
+    update_sha1(p, buf, read);
     debug("bytes %d to %d:", p->offset, p->offset + read);
     write_data(buf, p, read);
     p->offset += read;
@@ -75,12 +80,12 @@ recieve_data(struct message mess, struct peer *p)
       p->offset / B_SIZE, g_bt.piece_size / B_SIZE);
     p->last_block += B_SIZE;
     p->offset = p->last_block;
-    p->last_piece_download_is_finished_and_we_have_to_request_a_new_one = 1;
+    p->downloaded = 1;
   }
   if (p->offset >= g_bt.piece_size)
   {
     debug("PIECE %u IS DOWNLOADED", p->downloading);
-    verify_piece(p->downloading);
+    verify_piece(p);
     debug("OUR LOCAL BITFIELD IS:");
     verbose_bitfield(g_bt.pieces_len, g_bt.pieces);
     p->downloading = -1;

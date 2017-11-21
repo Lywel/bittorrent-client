@@ -1,6 +1,8 @@
 #ifndef CLIENT_H
 # define CLIENT_H
-# include <stdint.h>
+
+#include <stdint.h>
+#include <openssl/evp.h>
 
 enum peer_status
 {
@@ -23,8 +25,9 @@ struct peer
   uint32_t offset;
   uint32_t last_block;
   char *bitfield;
+  EVP_MD_CTX *mdctx;
   int downloading;
-  char last_piece_download_is_finished_and_we_have_to_request_a_new_one;
+  char downloaded;
   enum peer_status status;
 };
 
