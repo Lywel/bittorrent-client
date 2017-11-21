@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <sys/socket.h>
 #include "debug.h"
+#include "dico_finder.h"
+#include "buffer.h"
 
 static void
 verbose_bitfield(uint32_t len, char *bytes)
@@ -15,6 +17,22 @@ verbose_bitfield(uint32_t len, char *bytes)
       verbose("%u", !!((1 << j) & cur));
   }
   verbose("\n");
+}
+
+static void
+write_data(void *data, struct peer *p, uint32_t len)
+{
+  struct be_node *info = dico_find(g_bt.torrent, "info");
+  struct be_node *files = dico_find(info, "files");
+  char *path;
+  if (!files)
+    path = dico_find_str(info, "name");
+  else
+    path = NULL;
+  FILE *f = fopen(path, "a");
+  fseek(f, p->downloading * g_bt.piece_size + p->offset, SEEK_SET);
+  fwrite(data, 1, len, f);
+  fclose(f);
 }
 
 static void
@@ -39,7 +57,7 @@ recieve_data(struct message mess, struct peer *p)
   // TODO: Compute the hash while recieving the data
   if (mess.id != 7)
   {
-    //fwrite(&mess, 1, sizeof(struct message), stdout);
+    write_data(&mess, p, sizeof(struct message));
     p->offset += sizeof(struct message);
   }
 
@@ -48,7 +66,7 @@ recieve_data(struct message mess, struct peer *p)
   while ((read = recv(p->sfd, buf, B_SIZE, 0)) > 0)
   {
     debug("bytes %d to %d:", p->offset, p->offset + read);
-    //fwrite(buf, 1, read, stdout);
+    write_data(buf, p, read);
     p->offset += read;
   }
   if (p->offset > p->last_block + B_SIZE)
