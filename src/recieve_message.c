@@ -61,7 +61,7 @@ recieve_data(struct message mess, struct peer *p)
   if (p->offset >= g_bt.piece_size)
   {
     debug("PIECE %u IS DOWNLOADED", p->downloading);
-    check_piece(p->dowloading);
+    verify_piece(p->downloading);
     debug("OUR LOCAL BITFIELD IS:");
     verbose_bitfield(g_bt.pieces_len, g_bt.pieces);
     p->downloading = -1;
