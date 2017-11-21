@@ -5,6 +5,25 @@
 #include "bencode.h"
 #include "dico_finder.h"
 
+/*static void
+adjust_pieces(char *pieces)
+{
+  int last_zero = 0;
+  char cur = g_bt.pieces[g_bt.pieces_len - 1];
+  char c = cur;
+  for (int i = 0; i < 8; ++i, c >>= 1)
+  {
+     if (!(c & 0x01) && !last_zero)
+       last_zero = i;
+     else if (last_zero && c & 0x01)
+       last_zero = 0;
+  }
+
+  if (last_zero != 0 && last_zero != 7)
+    for (int i = last_zero; i < 8; ++i)
+      cur |= 1 << i;
+}*/
+
 static char *
 compute_sha1(s_buf *info)
 {

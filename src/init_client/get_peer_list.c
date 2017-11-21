@@ -11,9 +11,22 @@
 static char *
 build_tracker_uri(struct be_node *dico, CURL *curl)
 {
+  long long left = 0;
   char *urn = dico_find_str(dico, "announce");
   char *e_info_hash = curl_easy_escape(curl, g_bt.info_hash, 20);
-  long long left = dico_find_int(dico_find(g_bt.torrent, "info"), "length");
+  struct be_node *length = dico_find(dico_find(g_bt.torrent, "info"), "length");
+
+  if (!length)
+  {
+    struct be_node **l  = dico_find(dico_find(g_bt.torrent, "info"),
+                                    "files")->val.l;
+    for (int i = 0; l[i]; ++i)
+    {
+      left += dico_find_int(l[i], "length");
+    }
+  }
+  else
+    left = length->val.i;
 
   debug("listening on port %u", g_bt.port);
   char *format = "%s?peer_id=%s&info_hash=%s&port=%u&left=%d&downloaded=0&"
@@ -21,6 +34,7 @@ build_tracker_uri(struct be_node *dico, CURL *curl)
 
   long long len = strlen(format) + strlen(urn) + strlen(e_info_hash)
                   + logl(left) + 24;
+  (void)len;
   char *uri = calloc(len, sizeof(char));
   if (!uri)
     return NULL;
