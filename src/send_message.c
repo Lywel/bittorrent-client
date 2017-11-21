@@ -45,7 +45,6 @@ send_message(void *message, size_t len, struct peer *p)
 int
 send_request_message(struct peer *p)
 {
-  p->downloaded = 0;
   uint32_t index;
   if (p->downloading < 0)
     index = get_interesting_piece(p);
@@ -62,11 +61,6 @@ send_request_message(struct peer *p)
   req.begin = htonl(p->offset);
   req.length = htonl(B_SIZE);
   req.len = htonl(13);
-
-  p->offset += B_SIZE;
-
-  if (p->offset >= g_bt.piece_size)
-    p->downloading = -1;
 
   return send_message(&req, sizeof(req), p);
 }

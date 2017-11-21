@@ -20,11 +20,10 @@ struct peer
   char am_interested;
   char peer_choking;
   char peer_interested;
-  int piece_nb;
   uint32_t offset;
+  uint32_t last_block;
   char *bitfield;
-  char downloading;
-  char downloaded;
+  int downloading;
   enum peer_status status;
 };
 

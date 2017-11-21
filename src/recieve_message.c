@@ -8,7 +8,7 @@
 static void
 verbose_bitfield(uint32_t len, char *bytes)
 {
-  for (size_t i = 0; i < len; ++i)
+  for (uint32_t i = 0; i < len; ++i)
   {
     char cur = bytes[i];
     for (char j = 7; j >= 0; --j)
@@ -18,47 +18,36 @@ verbose_bitfield(uint32_t len, char *bytes)
 }
 
 static int
-handle_bitfield(struct message mess, struct peer *p)
-{
-  if (mess.len - 1 > g_bt.pieces_len)
-    return -1;
-  char *bitfield = malloc((mess.len - 1) * sizeof(char));
-  if (!bitfield)
-    return -1;
-
-  if (recv(p->sfd, bitfield, mess.len - 1, 0) < 0)
-  {
-    perror("Could not read bitfield");
-    return -1;
-  }
-  p->am_interested = 1;
-
-  if (g_bt.pieces_len == mess.len - 1)
-  {
-    memcpy(p->bitfield, bitfield, g_bt.pieces_len);
-    verbose_bitfield(mess.len - 1, bitfield);
-  }
-  free(bitfield);
-
-  return -1 * !!(g_bt.pieces_len != mess.len - 1);
-}
-
-static int
 recieve_data(struct message mess, struct peer *p)
 {
   if (mess.id != 7)
-    fwrite(&mess, 1, sizeof(struct message), stdout);
-
-  char buf[4094];
-  ssize_t read = 0;
-  ssize_t offset = (mess.id != 7) * sizeof(struct message);
-  while ((read = recv(p->sfd, buf, 1024, 0)) > 0)
   {
-    debug("bytes %d to %d:", offset, offset + read);
-    fwrite(buf, 1, read, stdout);
-    puts("");
-    offset += read;
-    //write_file(buf, len, p->req_blk, p->req_offset);
+    //fwrite(&mess, 1, sizeof(struct message), stdout);
+    p->offset += sizeof(struct message);
+  }
+
+  char buf[B_SIZE];
+  ssize_t read = 0;
+  while ((read = recv(p->sfd, buf, B_SIZE, 0)) > 0)
+  {
+    debug("bytes %d to %d:", p->offset, p->offset + read);
+    //fwrite(buf, 1, read, stdout);
+    p->offset += read;
+  }
+  if (p->offset >= g_bt.piece_size)
+  {
+    debug("PIECE %u IS DOWNLOADED", p->downloading);
+    p->downloading = -1;
+  }
+  else
+  {
+    if (p->offset > p->last_block + B_SIZE)
+    {
+      debug("Piece %u : SUCCESS downloaded block %u/%u", p->downloading,
+        p->offset / B_SIZE, g_bt.piece_size / B_SIZE);
+      p->last_block += B_SIZE;
+      p->offset = B_SIZE;
+    }
   }
   return read;
 }
@@ -81,30 +70,42 @@ recieve_piece(struct message mess, struct peer *p)
   debug("recieving block %u of size %u beggining at %u",
     ntohl(piece.index), blk_len, ntohl(piece.begin));
 
-  char buf[4094];
-  ssize_t read = 0;
-  ssize_t offset = 0;
-  while ((read = recv(p->sfd, buf, 1024, 0)) > 0)
-  {
-    debug("bytes %d to %d:", offset, offset + read);
-    fwrite(buf, 1, read, stdout);
-    puts("");
-    offset += read;
-    //write_file(buf, len, p->req_blk, p->req_offset);
-  }
-  p->downloaded = 1;
+  p->downloading = ntohl(piece.index);
+  p->offset = ntohl(piece.begin);
   return recieve_data(mess, p);
+}
+
+static int
+handle_bitfield(struct message mess, struct peer *p)
+{
+  char *bitfield = malloc((mess.len - 1) * sizeof(char));
+  if (!bitfield)
+    return -1;
+
+  if (recv(p->sfd, bitfield, mess.len - 1, 0) < 0)
+  {
+    perror("Could not read bitfield");
+    return -1;
+  }
+  p->am_interested = 1;
+
+  memcpy(p->bitfield, bitfield, g_bt.pieces_len);
+  verbose_bitfield(mess.len - 1, bitfield);
+  free(bitfield);
+
+  return 0;
 }
 
 static int
 handle_message(struct message mess, struct peer *p)
 {
   verbose_recv(mess, p);
+  debug("downloading piece %d", p->downloading);
   switch(mess.id)
   {
   case 0:
-    debug("recieved choke message");
-    p->am_choking = 1;
+    if (mess.len)
+      p->am_choking = 1;
     break;
   case 1:
     debug("recieved unchocke message");
@@ -122,9 +123,21 @@ handle_message(struct message mess, struct peer *p)
     debug("recieved have message");
     break;
   case 5:
-    return handle_bitfield(mess, p);
+    if (p->downloading < 0)
+      return handle_bitfield(mess, p);
+    return recieve_data(mess, p);
   case 7:
-    return recieve_piece(mess, p);
+    if (p->downloading < 0)
+      return recieve_piece(mess, p);
+    return recieve_data(mess, p);
+  case 8:
+    if (mess.len != 13)
+      return recieve_data(mess, p);
+    return 0;
+  case 9:
+    if (mess.len != 3)
+      return recieve_data(mess, p);
+    return 0;
   default:
     debug("recieved continuation data");
     return recieve_data(mess, p);

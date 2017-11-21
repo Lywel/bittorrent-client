@@ -69,7 +69,8 @@ network_loop(int efd, struct epoll_event *events)
           peer->status = P_CO;
           send_handshake(peer);
         }
-        if (!peer->am_choking && peer->am_interested && peer->downloaded)
+        if (!peer->am_choking && peer->am_interested
+          && peer->offset >= peer->last_block)
           send_request_message(peer);
       }
     }

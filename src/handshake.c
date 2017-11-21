@@ -64,6 +64,6 @@ recieve_handshake(struct peer *peer)
   }
 
   peer->status = P_HDSK;
-  debug("handshake: '%*s'", HANSHAKE_S, handshake);
+  debug("handshake: done.");
   return 0;
 }
