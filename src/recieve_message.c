@@ -5,6 +5,7 @@
 #include <sys/socket.h>
 #include "debug.h"
 #include "recieve_message.h"
+#include "bencode.h"
 #include "dico_finder.h"
 #include "buffer.h"
 
@@ -20,22 +21,63 @@ verbose_bitfield(uint32_t len, char *bytes)
   verbose("\n");
 }
 
-static void
-write_data(void *data, struct peer *p, uint32_t len)
+static char *
+get_file_path(struct be_node *n, char *p)
 {
-  struct be_node *info = dico_find(g_bt.torrent, "info");
-  struct be_node *files = dico_find(info, "files");
-  char *path;
-  if (!files)
-    path = dico_find_str(info, "name");
-  else
-    path = NULL;
+  char *res = p;
+  memset(p, 0, 512);
+  struct be_node **list = dico_find(n, "path")->val.l;
+  for (uint32_t i = 0; list[i]; ++i)
+  {
+    memcpy(p, list[i]->val.s->str, list[i]->val.s->len);
+    p += list[i]->val.s->len + 1;
+    *(p - 1) = list[i+1] ? '/' : 0;
+  }
+  return res;
+}
+
+static void
+write_data(char *data, struct peer *p, uint32_t len)
+{
   if (p->downloading < 0)
     return;
-  FILE *f = fopen(path, "r+");
-  fseek(f, p->downloading * g_bt.piece_size + p->offset, SEEK_SET);
-  fwrite(data, 1, len, f);
-  fclose(f);
+  struct be_node *info = dico_find(g_bt.torrent, "info");
+  struct be_node *files = dico_find(info, "files");
+  uint32_t pos = p->downloading * g_bt.piece_size + p->offset;
+
+  if (!files)
+  {
+    FILE *f = fopen(dico_find_str(info, "name"), "r+");
+    fseek(f, pos, SEEK_SET);
+    fwrite(data, 1, len, f);
+    fclose(f);
+  }
+  else
+  {
+    uint32_t acc = 0;
+    uint32_t i = 0;
+    uint32_t flen = 0;
+    while (acc < p->downloading * 20 + p->offset)
+    {
+      flen = dico_find_int(files->val.l[i], "length");
+      if (acc + len > p->downloading * 20 + p->offset)
+        break;
+      acc += len;
+      i++;
+    }
+    char path[512];
+    uint32_t written = 0;
+    FILE *f = fopen(get_file_path(files->val.l[i], path), "r+");
+    fseek(f, pos - acc, SEEK_SET);
+    while ((written = fwrite(data, 1, len < flen ? len : flen, f)) < len)
+    {
+      len -= written;
+      data += written;
+      fclose(f);
+      f = fopen(get_file_path(files->val.l[++i], path), "r+");
+    }
+    fclose(f);
+  }
 }
 
 static void
@@ -63,7 +105,7 @@ recieve_data(struct message mess, struct peer *p)
   // TODO: Compute the hash while recieving the data
   if (mess.id != 7)
   {
-    write_data(&mess, p, sizeof(struct message));
+    write_data((void *)&mess, p, sizeof(struct message));
     p->offset += sizeof(struct message);
   }
 

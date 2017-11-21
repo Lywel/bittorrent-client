@@ -1,5 +1,9 @@
 #include <openssl/sha.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <string.h>
 #include "debug.h"
 #include "peer_id.h"
 #include "bencode.h"
@@ -27,6 +31,29 @@ update_sha1(struct peer *p, char *buf, unsigned int len)
 
   EVP_DigestUpdate(mdctx, buf, len);
   p->mdctx = mdctx;
+}
+
+static void
+create_file(struct be_node *n)
+{
+  char wd[512];
+  getcwd(wd, 512);
+  char tmp[512];
+  struct be_node **list = n->val.l;
+  uint32_t i;
+  for (i = 0; list[i]; ++i)
+  {
+    memset(tmp, 0, 512);
+    memcpy(tmp, list[i]->val.s->str, list[i]->val.s->len);
+    if (list[i + 1])
+    {
+      mkdir(tmp, 0700);
+      chdir(tmp);
+    }
+  }
+  FILE *f = fopen(tmp, "w");
+  fclose(f);
+  chdir(wd);
 }
 
 void
@@ -63,6 +90,11 @@ init_client(void)
     char *path = dico_find_str(info, "name");
     FILE *f = fopen(path, "w");
     fclose(f);
+  }
+  else
+  {
+    for (uint32_t i = 0; files->val.l[i]; ++i)
+      create_file(dico_find(files->val.l[i], "path"));
   }
 }
 
