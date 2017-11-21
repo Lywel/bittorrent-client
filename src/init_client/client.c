@@ -51,7 +51,6 @@ init_client(void)
   g_bt.pieces = pieces;
   g_bt.piece_size = piece_size;
   g_bt.pieces_len = bytes;
-
   // Info hash
   s_buf *info = bencode_encode(dico_find(g_bt.torrent, "info"));
   g_bt.info_hash = compute_sha1(info);

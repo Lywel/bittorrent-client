@@ -6,23 +6,26 @@
 #include "dico_finder.h"
 #include "debug.h"
 #include "decode_binary_peers.h"
+#include "math.h"
 
 static char *
 build_tracker_uri(struct be_node *dico, CURL *curl)
 {
   char *urn = dico_find_str(dico, "announce");
   char *e_info_hash = curl_easy_escape(curl, g_bt.info_hash, 20);
+  long long left = dico_find_int(dico_find(g_bt.torrent, "info"), "length");
 
   debug("listening on port %u", g_bt.port);
-  char *format = "%s?peer_id=%s&info_hash=%s&port=%u&left=0&downloaded=0&"
+  char *format = "%s?peer_id=%s&info_hash=%s&port=%u&left=%d&downloaded=0&"
                  "uploaded=0&compact=1";
 
-  long long len = strlen(format) + strlen(urn) + strlen(e_info_hash) + 23;
+  long long len = strlen(format) + strlen(urn) + strlen(e_info_hash)
+                  + logl(left) + 24;
   char *uri = calloc(len, sizeof(char));
   if (!uri)
     return NULL;
 
-  sprintf(uri, format, urn, g_bt.peer_id, e_info_hash, g_bt.port);
+  sprintf(uri, format, urn, g_bt.peer_id, e_info_hash, g_bt.port, left);
 
 
   curl_free(e_info_hash);
