@@ -6,7 +6,8 @@ Overview :
   following the BitTorrent protocol.
 
 I)  Building executable
-  * For the maintainer
+
+* For the maintainer
     ```bash
       # Run everytime any Makefile.am or the configure.ac is updated
       # in order to generate ./configure
@@ -20,4 +21,16 @@ I)  Building executable
                               # other generated binaries if you're not panning
                               # on updating the Makefile
     ```
+* Run test suite
+
 II) Usage
+
+      ./my-bittorrent [options] [files]
+
+  OPTIONS
+      --pretty-print-torrent-file
+        To pretty-print the content of the .torrent file
+      --dump-peers
+        Display peers and ports we got from tracker
+      --verbose
+        Log everything on standart output
