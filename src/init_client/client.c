@@ -18,12 +18,15 @@ update_sha1(struct peer *p, char *buf, unsigned int len)
 {
   EVP_MD_CTX *mdctx;
   if (!p->mdctx)
+  {
     mdctx = EVP_MD_CTX_create();
+    EVP_DigestInit_ex(mdctx, EVP_sha1(), NULL);
+  }
   else
     mdctx = p->mdctx;
 
-  EVP_DigestInit_ex(mdctx, EVP_sha1(), NULL);
   EVP_DigestUpdate(mdctx, buf, len);
+  p->mdctx = mdctx;
 }
 
 void

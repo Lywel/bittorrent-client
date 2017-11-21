@@ -23,16 +23,19 @@ verbose_bitfield(uint32_t len, char *bytes)
 static void
 verify_piece(struct peer *p)
 {
-  unsigned int len = 20;
+  unsigned int len = 0;
   unsigned char final_hash[20];
   EVP_DigestFinal_ex(p->mdctx, final_hash, &len);
   struct be_node *info_dic = dico_find(g_bt.torrent, "info");
   char *pieces_hash = dico_find_str(info_dic, "pieces");
   if (memcmp(pieces_hash + p->downloading * 20, final_hash, 20))
   {
+    printf("PIECE NB %d VERIFIED :)\n", p->downloading);
     EVP_MD_CTX_destroy(p->mdctx);
     p->mdctx = NULL;
   }
+  else
+    printf("PIECE NB %d NOT VERIFIED :(\n", p->downloading);
 }
 
 static int
