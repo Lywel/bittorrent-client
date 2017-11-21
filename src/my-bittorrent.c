@@ -95,7 +95,7 @@ dump_peers(void)
   struct be_node *peer_list = get_peer_list_from_tracker(g_bt.torrent);
   struct be_node *peers = dico_find(peer_list, "peers");
 
-  for (long long i = 0; peers->val.l[i]; ++i)
+  for (long long i = 0; peers && peers->val.l[i]; ++i)
     printf("%s:%lld\n", dico_find_str(peers->val.l[i], "ip"),
                     dico_find_int(peers->val.l[i], "port"));
 

@@ -112,6 +112,9 @@ init_client(void)
   }
   else
   {
+    char *path = dico_find_str(info, "name");
+    mkdir(path, 0700);
+    chdir(path);
     for (uint32_t i = 0; files->val.l[i]; ++i)
       create_file(dico_find(files->val.l[i], "path"));
   }
