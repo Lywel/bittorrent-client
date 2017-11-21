@@ -51,7 +51,6 @@ init_client(void)
   g_bt.pieces = pieces;
   g_bt.piece_size = piece_size;
   g_bt.pieces_len = bytes;
-
   // Info hash
   struct be_node *info = dico_find(g_bt.torrent, "info");
   s_buf *info_be = bencode_encode(info);
