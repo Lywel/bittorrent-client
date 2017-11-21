@@ -44,7 +44,10 @@
 [x] Create the global structure
 [x] Create the download loop
 [x] set socket timout
-[ ] Remove the limit of 2 peers in my-bittorent.c : download :72 (i < 2)
-[ ] handle multifile
+[x] Remove the limit of 2 peers in my-bittorent.c : download :72 (i < 2)
+[x] handle multifile
 [ ] coding style
 [ ] make executable in current folder
+[ ] do not create directoy tree for non download options
+[ ] handle peer reconnection
+[ ] handle end of download
