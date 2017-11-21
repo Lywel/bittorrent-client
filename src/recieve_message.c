@@ -17,9 +17,26 @@ verbose_bitfield(uint32_t len, char *bytes)
   verbose("\n");
 }
 
+static void
+verify_piece(uint32_t id)
+{
+  id = id;
+  // struct be_node *info_dic = dico_find(g_bt.torrent, "info");
+  // s_buf *pieces_hash = dico_find_str(info_dic, "pieces")->val.s;
+  // TODO:
+  // Compute hash while recieveing the data from the peer
+  // And store it on the peer struct
+  // Then we just have to compare it here with the expected hash
+  // if it doesnt match we unset the corecpondding piece byte
+  //
+  // if (strncmp(pieces_hash->str + id * 20, )
+}
+
 static int
 recieve_data(struct message mess, struct peer *p)
 {
+  // TODO: replace fwrite with write to the correcsponding file
+  // TODO: Compute the hash while recieving the data
   if (mess.id != 7)
   {
     //fwrite(&mess, 1, sizeof(struct message), stdout);
@@ -34,20 +51,20 @@ recieve_data(struct message mess, struct peer *p)
     //fwrite(buf, 1, read, stdout);
     p->offset += read;
   }
+  if (p->offset > p->last_block + B_SIZE)
+  {
+    debug("Piece %u : SUCCESS downloaded block %u/%u", p->downloading,
+      p->offset / B_SIZE, g_bt.piece_size / B_SIZE);
+    p->last_block += B_SIZE;
+    p->offset = p->last_block;
+  }
   if (p->offset >= g_bt.piece_size)
   {
     debug("PIECE %u IS DOWNLOADED", p->downloading);
+    check_piece(p->dowloading);
+    debug("OUR LOCAL BITFIELD IS:");
+    verbose_bitfield(g_bt.pieces_len, g_bt.pieces);
     p->downloading = -1;
-  }
-  else
-  {
-    if (p->offset > p->last_block + B_SIZE)
-    {
-      debug("Piece %u : SUCCESS downloaded block %u/%u", p->downloading,
-        p->offset / B_SIZE, g_bt.piece_size / B_SIZE);
-      p->last_block += B_SIZE;
-      p->offset = B_SIZE;
-    }
   }
   return read;
 }
@@ -123,7 +140,7 @@ handle_message(struct message mess, struct peer *p)
     debug("recieved have message");
     break;
   case 5:
-    if (p->downloading < 0)
+    if (p->downloading < 0 && mess.len - 1 == g_bt.pieces_len)
       return handle_bitfield(mess, p);
     return recieve_data(mess, p);
   case 7:
