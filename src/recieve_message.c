@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <sys/socket.h>
 #include "debug.h"
+#include "recieve_message.h"
 
 static void
 verbose_bitfield(uint32_t len, char *bytes)
@@ -29,7 +30,8 @@ verify_piece(uint32_t id)
   // Then we just have to compare it here with the expected hash
   // if it doesnt match we unset the corecpondding piece byte
   //
-  // if (strncmp(pieces_hash->str + id * 20, )
+  // if (memcmp(pieces_hash->str + id * 20, )
+  // EVP_MD_CTX_destroy(p->mdctx);
 }
 
 static int
@@ -47,6 +49,7 @@ recieve_data(struct message mess, struct peer *p)
   ssize_t read = 0;
   while ((read = recv(p->sfd, buf, B_SIZE, 0)) > 0)
   {
+    update_sha1(p, buf, read);
     debug("bytes %d to %d:", p->offset, p->offset + read);
     //fwrite(buf, 1, read, stdout);
     p->offset += read;

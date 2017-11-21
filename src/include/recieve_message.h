@@ -15,6 +15,6 @@ enum type
 };
 
 int recieve_message(struct peer *p);
-int recieve_piece(struct message mess, struct peer *p);
+void update_sha1(struct peer *p, char *buf, unsigned int len);
 
 #endif
