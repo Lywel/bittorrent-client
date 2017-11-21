@@ -21,6 +21,22 @@ verbose_bitfield(uint32_t len, char *bytes)
 }
 
 static void
+write_data(void *data, struct peer *p, uint32_t len)
+{
+  struct be_node *info = dico_find(g_bt.torrent, "info");
+  struct be_node *files = dico_find(info, "files");
+  char *path;
+  if (!files)
+    path = dico_find_str(info, "name");
+  else
+    path = NULL;
+  FILE *f = fopen(path, "a");
+  fseek(f, p->downloading * g_bt.piece_size + p->offset, SEEK_SET);
+  fwrite(data, 1, len, f);
+  fclose(f);
+}
+
+static void
 verify_piece(struct peer *p)
 {
   unsigned int len = 0;
@@ -45,7 +61,7 @@ recieve_data(struct message mess, struct peer *p)
   // TODO: Compute the hash while recieving the data
   if (mess.id != 7)
   {
-    //fwrite(&mess, 1, sizeof(struct message), stdout);
+    write_data(&mess, p, sizeof(struct message));
     p->offset += sizeof(struct message);
   }
 
@@ -55,7 +71,7 @@ recieve_data(struct message mess, struct peer *p)
   {
     update_sha1(p, buf, read);
     debug("bytes %d to %d:", p->offset, p->offset + read);
-    //fwrite(buf, 1, read, stdout);
+    write_data(buf, p, read);
     p->offset += read;
   }
   if (p->offset > p->last_block + B_SIZE)
