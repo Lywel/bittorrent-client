@@ -12,10 +12,11 @@
 static void
 verbose_bitfield(uint32_t len, char *bytes)
 {
+  int index = 0;
   for (uint32_t i = 0; i < len; ++i)
   {
     char cur = bytes[i];
-    for (char j = 7; j >= 0; --j)
+    for (char j = 7; j >= 0 && index < g_bt.pieces_nb; --j, ++index)
       verbose("%u", !!((1 << j) & cur));
   }
   verbose("\n");
