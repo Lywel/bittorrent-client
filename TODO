@@ -52,3 +52,4 @@
 [ ] handle peer reconnection
 [ ] handle end of download
 [ ] do not create file when options
+[ ] when hash not verified remove piece from local bitfield
