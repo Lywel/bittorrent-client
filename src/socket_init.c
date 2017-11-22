@@ -1,4 +1,6 @@
 #include <sys/types.h>
+#include <fcntl.h>
+#include <sys/epoll.h>
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <stdio.h>
@@ -8,6 +10,43 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include "debug.h"
+#include "socket_init.h"
+#include "socket_close.h"
+
+static int
+make_socket_non_blocking(int sfd)
+{
+  int flags;
+  if ((flags = fcntl(sfd, F_GETFL, 0)) < 0)
+  {
+    debug("fcntl failed");
+    return -1;
+  }
+  if (fcntl(sfd, F_SETFL, flags | O_NONBLOCK) < 0)
+  {
+    debug("fcntl failed");
+    return -1;
+  }
+  return 0;
+}
+
+void
+init_epoll_event(struct peer *peer, int efd)
+{
+  struct epoll_event event;
+  if (peer_socket_init(peer)
+    + make_socket_non_blocking(peer->sfd)
+    + peer_connect(peer) < 0)
+  {
+    debug("FAILED : peer init / connect");
+    peer_socket_close(peer);
+    return;
+  }
+  event.data.ptr = peer;
+  event.events = EPOLLIN | EPOLLOUT | EPOLLERR | EPOLLET;
+  epoll_ctl(efd, EPOLL_CTL_ADD, peer->sfd, &event);
+  return;
+}
 
 /**
  * init a new socket and returns its file descriptor
@@ -74,9 +113,6 @@ peer_connect(struct peer *peer)
          peer_sock->h_length);
 
   serv_addr.sin_port = htons(peer->port);
-
-  debug("Peer port : %d", ntohs(serv_addr.sin_port));
-  debug("Host name : %s", peer_sock->h_name);
 
   if (!peer_sock)
   {

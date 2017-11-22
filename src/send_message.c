@@ -8,25 +8,38 @@
 #include "dico_finder.h"
 #include "socket_close.h"
 
-static uint32_t
+int
 get_interesting_piece(struct peer *p)
 {
-  // TODO : should not check the last bits of the last byte
   uint32_t index = 0;
   struct be_node *info_dic = dico_find(g_bt.torrent, "info");
   uint32_t pieces_nb = dico_find(info_dic, "pieces")->val.s->len / 20;
+
+  if (!p)
+  {
+    for (size_t i = 0; i < g_bt.pieces_len; ++i)
+    {
+      char have = g_bt.pieces[i];
+      for (char j = 7; j >= 0 && index < pieces_nb; --j)
+      {
+        if (!(have & (1 << j)))
+          return 1;
+        index++;
+      }
+    }
+    return 0;
+  }
+
   debug("looking for an interesting bit in %u bits", g_bt.pieces_len);
-  for (size_t i = 0; i < g_bt.pieces_len && index < pieces_nb; ++i)
+  for (size_t i = 0; i < g_bt.pieces_len; ++i)
   {
     char cur = p->bitfield[i];
     char have = g_bt.pieces[i];
-    for (char j = 7; j >= 0; --j)
+    for (char j = 7; j >= 0 && index < pieces_nb; --j)
     {
       if (!(have & (1 << j)) && (cur & (1 << j)))
       {
         g_bt.pieces[i] |= 1 << j;
-        p->downloading = index;
-        p->offset = 0;
         return index;
       }
       index++;
@@ -50,14 +63,17 @@ int
 send_request_message(struct peer *p)
 {
   if (p->downloading < 0)
+  {
     p->downloading = get_interesting_piece(p);
-  if (p->downloading < 0)
+    p->offset = 0;
+  }
+  if (p->downloading == -1)
   {
     peer_socket_close(p);
     return -1;
   }
   debug("requesting piece nb %d with an offset of %d", p->downloading, p->offset);
-  p->downloaded = 0;
+  p->downloaded = 2;
 
   struct request req;
   req.id = 6;

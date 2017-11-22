@@ -86,6 +86,9 @@ init_client(void)
   // Bencode parsing
   g_bt.torrent = bencode_file_decode(g_bt.path);
 
+  // Peer list
+  g_bt.peers = NULL;
+
   struct be_node *info_dic = dico_find(g_bt.torrent, "info");
   // Keeping track of downloaded pieces
   uint32_t pieces_nb = dico_find(info_dic, "pieces")->val.s->len / 20;

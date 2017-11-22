@@ -13,4 +13,5 @@ peer_socket_close(struct peer *peer)
     peer->ip, peer->port);
 
   free(peer->info);
+  peer->sfd = -1;
 }
