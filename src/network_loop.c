@@ -91,10 +91,10 @@ network_loop(int efd, struct epoll_event *events)
       loop_start = time(NULL);
       struct be_node *peers = get_peer_list_from_tracker(g_bt.torrent);
       free(peers);
+      for (long long i = 0; g_bt.peers[i]; ++i)
+        if (g_bt.peers[i]->sfd < 0 && get_interesting_piece(NULL))
+          init_epoll_event(g_bt.peers[i], efd);
     }
-    for (long long i = 0; g_bt.peers[i]; ++i)
-      if (g_bt.peers[i]->sfd < 0 && get_interesting_piece(NULL))
-        init_epoll_event(g_bt.peers[i], efd);
   }
   return 0;
 }

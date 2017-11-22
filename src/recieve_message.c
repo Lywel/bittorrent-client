@@ -98,7 +98,10 @@ verify_piece(struct peer *p)
     p->downloaded = 1;
   }
   else
+  {
     debug("PIECE NB %d NOT VERIFIED :(\n", p->downloading);
+    g_bt.pieces[p->downloading / 8] &= ~(1 << (7 - p->downloading % 8));
+  }
 }
 
 static int

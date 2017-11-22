@@ -13,5 +13,6 @@ peer_socket_close(struct peer *peer)
     peer->ip, peer->port);
 
   free(peer->info);
+  g_bt.pieces[peer->downloading / 8] &= ~(1 << (7 - peer->downloading % 8));
   peer->sfd = -1;
 }
