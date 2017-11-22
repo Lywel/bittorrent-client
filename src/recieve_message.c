@@ -12,11 +12,13 @@
 static void
 verbose_bitfield(uint32_t len, char *bytes)
 {
-  int index = 0;
+  struct be_node *info_dic = dico_find(g_bt.torrent, "info");
+  uint32_t pieces_nb = dico_find(info_dic, "pieces")->val.s->len / 20;
+  uint32_t index = 0;
   for (uint32_t i = 0; i < len; ++i)
   {
     char cur = bytes[i];
-    for (char j = 7; j >= 0 && index < g_bt.pieces_nb; --j, ++index)
+    for (char j = 7; j >= 0 && index < pieces_nb; --j, ++index)
       verbose("%u", !!((1 << j) & cur));
   }
   verbose("\n");
@@ -216,7 +218,7 @@ handle_message(struct message mess, struct peer *p)
       return handle_bitfield(mess, p);
     return recieve_data(mess, p);
   case 7:
-    if (downloaded)
+    if (p->downloaded)
       return recieve_piece(mess, p);
     return recieve_data(mess, p);
   case 8:
