@@ -93,6 +93,7 @@ verify_piece(struct peer *p)
     printf("PIECE NB %d VERIFIED :)\n", p->downloading);
     EVP_MD_CTX_destroy(p->mdctx);
     p->mdctx = NULL;
+    p->downloaded = 1;
   }
   else
     printf("PIECE NB %d NOT VERIFIED :(\n", p->downloading);
