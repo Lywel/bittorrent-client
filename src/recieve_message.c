@@ -121,7 +121,7 @@ recieve_data(struct message mess, struct peer *p)
   }
   if (p->offset >= p->last_block + B_SIZE)
   {
-    verbose("%x%x%x: msg: recv: piece:%u %u %u\n", (uint8_t)g_bt.info_hash[0],
+    verbose("%x%x%x: msg: recv: %s:%u: piece %u %u\n", (uint8_t)g_bt.info_hash[0],
          (uint8_t)g_bt.info_hash[1], (uint8_t)g_bt.info_hash[2],
          p->ip, p->port, p->downloading, p->offset);
     debug("Piece %u : SUCCESS downloaded block %u/%u", p->downloading,
