@@ -18,7 +18,7 @@ char *
 dico_find_str(struct be_node *node, const char *key)
 {
   struct be_node *n = dico_find(node, key);
-  if (n->type != BE_STR)
+  if (!n || n->type != BE_STR)
     return NULL;
   return n ? n->val.s->str : NULL;
 }
@@ -27,7 +27,7 @@ long long
 dico_find_int(struct be_node *node, const char *key)
 {
   struct be_node *n = dico_find(node, key);
-  if (n->type != BE_INT)
+  if (!n || n->type != BE_INT)
     return 0;
   return n ? n->val.i : 0;
 }
