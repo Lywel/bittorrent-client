@@ -104,8 +104,6 @@ verify_piece(struct peer *p)
 static int
 recieve_data(struct message mess, struct peer *p)
 {
-  // TODO: replace fwrite with write to the correcsponding file
-  // TODO: Compute the hash while recieving the data
   if (mess.id != 7)
   {
     write_data((void *)&mess, p, sizeof(struct message));
@@ -121,7 +119,7 @@ recieve_data(struct message mess, struct peer *p)
     write_data(buf, p, read);
     p->offset += read;
   }
-  if (p->offset > p->last_block + B_SIZE)
+  if (p->offset >= p->last_block + B_SIZE)
   {
     verbose("%x%x%x: msg: recv: piece:%u %u %u\n", (uint8_t)g_bt.info_hash[0],
          (uint8_t)g_bt.info_hash[1], (uint8_t)g_bt.info_hash[2],
@@ -146,11 +144,6 @@ recieve_data(struct message mess, struct peer *p)
 static int
 recieve_piece(struct message mess, struct peer *p)
 {
-  // verify if we finished a block
-  // if so checksum the block
-  // compare checksum to expected one
-  // if ok, write to disk
-  // send HAVE to peers
   struct piece piece;
   if (recv(p->sfd, &piece, sizeof(struct piece), 0) < 0)
   {
@@ -218,7 +211,7 @@ handle_message(struct message mess, struct peer *p)
       return handle_bitfield(mess, p);
     return recieve_data(mess, p);
   case 7:
-    if (p->downloaded)
+    if (p->downloaded == 2)
       return recieve_piece(mess, p);
     return recieve_data(mess, p);
   case 8:

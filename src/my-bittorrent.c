@@ -14,41 +14,6 @@
 struct bittorent g_bt;
 
 static int
-make_socket_non_blocking(int sfd)
-{
-  int flags;
-  if ((flags = fcntl(sfd, F_GETFL, 0)) < 0)
-  {
-    debug("fcntl failed");
-    return -1;
-  }
-  if (fcntl(sfd, F_SETFL, flags | O_NONBLOCK) < 0)
-  {
-    debug("fcntl failed");
-    return -1;
-  }
-  return 0;
-}
-
-static void
-init_epoll_event(struct peer *peer, int efd)
-{
-  struct epoll_event event;
-  if (peer_socket_init(peer)
-    + make_socket_non_blocking(peer->sfd)
-    + peer_connect(peer) < 0)
-  {
-    debug("FAILED : peer init / connect");
-    peer_socket_close(peer);
-    return;
-  }
-  event.data.ptr = peer;
-  event.events = EPOLLIN | EPOLLOUT | EPOLLERR | EPOLLET;
-  epoll_ctl(efd, EPOLL_CTL_ADD, peer->sfd, &event);
-  return;
-}
-
-static int
 download(void)
 {
   debug("starting download for %s", g_bt.path);
@@ -82,12 +47,12 @@ print_usage(char *bin)
   return -1;
 }
 
-static int
-pretty_print_torrent_file(void)
-{
-  bencode_dump_json(g_bt.torrent);
-  return 0;
-}
+  static int
+  pretty_print_torrent_file(void)
+  {
+    bencode_dump_json(g_bt.torrent);
+    return 0;
+  }
 
 static int
 dump_peers(void)

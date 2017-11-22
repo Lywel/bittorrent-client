@@ -43,6 +43,7 @@ struct bittorent
   char *info_hash;
   char *peer_id;
   uint16_t port;
+  time_t peer_list_timeout;
 };
 
 extern struct bittorent g_bt;

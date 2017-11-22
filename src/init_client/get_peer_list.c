@@ -49,7 +49,6 @@ build_tracker_uri(struct be_node *dico, CURL *curl)
 static size_t
 write_callback(char *ptr, size_t size, size_t nmemb, s_buf **userdata)
 {
-  debug("write_callback: %s", ptr);
   char *data = calloc(nmemb + 1, size);
   memcpy(data, ptr, size * nmemb);
   *userdata = buffer_init(data, size * nmemb);
@@ -100,13 +99,15 @@ get_peer_list_from_tracker(struct be_node *dico)
   {
     peer_list = bencode_decode(data->str, data->len);
     buffer_free(data);
+    struct be_node *peers = dico_find(peer_list, "peers");
+    g_bt.peer_list_timeout = dico_find_int(peer_list, "interval");
+
+    decode_binary_peers(peers);
+    peer_list_init(peers);
   }
   else
     fprintf(stderr, "curl failed: %s\n", curl_easy_strerror(res));
   curl_easy_cleanup(curl);
 
-  struct be_node *peers = dico_find(peer_list, "peers");
-  decode_binary_peers(peers);
-  peer_list_init(peers);
   return peer_list;
 }

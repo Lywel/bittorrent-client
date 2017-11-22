@@ -69,25 +69,38 @@ peer_list_init(struct be_node *node)
   if (!node || node->type != BE_LST)
     return;
   debug("peer list init");
-  g_bt.peers = NULL;
 
+  long long peer_id;
+  for(peer_id = 0; g_bt.peers && g_bt.peers[peer_id]; ++peer_id)
+    ;
   long long i;
   for (i = 0; node->val.l[i]; ++i)
   {
-    g_bt.peers = realloc(g_bt.peers, (i + 1) * sizeof(struct peer *));
-    g_bt.peers[i] = calloc(1, sizeof(struct peer));
-    g_bt.peers[i]->ip = dico_find_str(node->val.l[i], "ip");
-    g_bt.peers[i]->port = dico_find_int(node->val.l[i], "port");
-    g_bt.peers[i]->bitfield = calloc(g_bt.pieces_len, sizeof(char));
-    g_bt.peers[i]->offset = 0;
-    g_bt.peers[i]->downloading = -1;
-    g_bt.peers[i]->last_block = 0;
-    g_bt.peers[i]->mdctx = NULL;
-    g_bt.peers[i]->downloaded = 1;
+    if (g_bt.peers)
+    {
+      long long j;
+      for(j = 0; j < peer_id; ++j)
+        if (!strcmp(dico_find_str(node->val.l[i], "ip"), g_bt.peers[j]->ip))
+          break;
+      if (j < peer_id)
+        continue;
+    }
+    g_bt.peers = realloc(g_bt.peers, (peer_id + 1) * sizeof(struct peer *));
+    g_bt.peers[peer_id] = calloc(1, sizeof(struct peer));
+    g_bt.peers[peer_id]->ip = dico_find_str(node->val.l[i], "ip");
+    g_bt.peers[peer_id]->port = dico_find_int(node->val.l[i], "port");
+    g_bt.peers[peer_id]->bitfield = calloc(g_bt.pieces_len, sizeof(char));
+    g_bt.peers[peer_id]->offset = 0;
+    g_bt.peers[peer_id]->downloading = -1;
+    g_bt.peers[peer_id]->last_block = 0;
+    g_bt.peers[peer_id]->mdctx = NULL;
+    g_bt.peers[peer_id]->downloaded = 1;
+    g_bt.peers[peer_id]->sfd = -1;
+    peer_id++;
   }
 
-  g_bt.peers = realloc(g_bt.peers, (i + 1) * sizeof(struct peer *));
-  g_bt.peers[i] = NULL;
+  g_bt.peers = realloc(g_bt.peers, (peer_id + 1) * sizeof(struct peer *));
+  g_bt.peers[peer_id] = NULL;
 }
 
 void
