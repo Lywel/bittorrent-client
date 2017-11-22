@@ -12,10 +12,11 @@
 static void
 verbose_bitfield(uint32_t len, char *bytes)
 {
+  int index = 0;
   for (uint32_t i = 0; i < len; ++i)
   {
     char cur = bytes[i];
-    for (char j = 7; j >= 0; --j)
+    for (char j = 7; j >= 0 && index < g_bt.pieces_nb; --j, ++index)
       verbose("%u", !!((1 << j) & cur));
   }
   verbose("\n");
@@ -90,12 +91,12 @@ verify_piece(struct peer *p)
   char *pieces_hash = dico_find_str(info_dic, "pieces");
   if (memcmp(pieces_hash + p->downloading * 20, final_hash, 20))
   {
-    printf("PIECE NB %d VERIFIED :)\n", p->downloading);
     EVP_MD_CTX_destroy(p->mdctx);
     p->mdctx = NULL;
+    p->downloaded = 1;
   }
   else
-    printf("PIECE NB %d NOT VERIFIED :(\n", p->downloading);
+    debug("PIECE NB %d NOT VERIFIED :(\n", p->downloading);
 }
 
 static int
@@ -118,6 +119,9 @@ recieve_data(struct message mess, struct peer *p)
   }
   if (p->offset >= p->last_block + B_SIZE)
   {
+    verbose("%x%x%x: msg: recv: piece:%u %u %u\n", (uint8_t)g_bt.info_hash[0],
+         (uint8_t)g_bt.info_hash[1], (uint8_t)g_bt.info_hash[2],
+         p->ip, p->port, p->downloading, p->offset);
     debug("Piece %u : SUCCESS downloaded block %u/%u", p->downloading,
       p->offset / B_SIZE, g_bt.piece_size / B_SIZE);
     p->last_block += B_SIZE;
@@ -138,15 +142,15 @@ recieve_data(struct message mess, struct peer *p)
 static int
 recieve_piece(struct message mess, struct peer *p)
 {
-  uint32_t blk_len = mess.len - 8;
   struct piece piece;
   if (recv(p->sfd, &piece, sizeof(struct piece), 0) < 0)
   {
     perror("receive_piece : could not read message");
     return -1;
   }
-  debug("recieving block %u of size %u beggining at %u",
-    ntohl(piece.index), blk_len, ntohl(piece.begin));
+
+  p->downloaded = 0;
+  verbose("%u %u\n", ntohl(piece.index), ntohl(piece.begin));
 
   p->downloading = ntohl(piece.index);
   p->offset = ntohl(piece.begin);

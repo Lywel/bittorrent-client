@@ -74,6 +74,9 @@ send_request_message(struct peer *p)
   }
   debug("requesting piece nb %d with an offset of %d", p->downloading, p->offset);
   p->downloaded = 2;
+  verbose("%x%x%x: msg: send: %s:%u ", (uint8_t)g_bt.info_hash[0],
+          (uint8_t)g_bt.info_hash[1], (uint8_t)g_bt.info_hash[2],
+          p->ip, p->port);
 
   struct request req;
   req.id = 6;
@@ -81,6 +84,8 @@ send_request_message(struct peer *p)
   req.begin = htonl(p->offset);
   req.length = htonl(B_SIZE);
   req.len = htonl(13);
+
+  verbose("request %d %d %d\n", p->downloading, p->offset, B_SIZE);
 
   return send_message(&req, sizeof(req), p);
 }
@@ -122,5 +127,6 @@ int
 send_message_type(enum type type, struct peer *p)
 {
   struct message mess = get_message(type, p);
+  verbose_send(mess, p);
   return send_message(&mess, sizeof(mess), p);
 }

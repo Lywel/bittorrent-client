@@ -9,5 +9,6 @@
 void debug(char *fmt, ...);
 void verbose(char *fmt, ...);
 void verbose_recv(struct message mess, struct peer *peer);
+void verbose_send(struct message mess, struct peer *p);
 
 #endif

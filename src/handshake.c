@@ -9,13 +9,6 @@
 int
 send_handshake(struct peer *peer)
 {
-  debug("building handshake");
-  if (!peer->info)
-  {
-    debug("client not initialized");
-    return -1;
-  }
-
   char handshake[HANSHAKE_S];
   char reserved[RESERVED_S] =
   {
@@ -38,7 +31,9 @@ send_handshake(struct peer *peer)
     return -1;
   }
 
-  debug("handshaked sent: '%s'", handshake);
+  verbose("%x%x%x: msg: send: %s:%u handshake\n", (uint8_t)g_bt.info_hash[0],
+         (uint8_t)g_bt.info_hash[1], (uint8_t)g_bt.info_hash[2],
+          peer->ip, peer->port);
   return 0;
 }
 
@@ -50,12 +45,6 @@ send_handshake(struct peer *peer)
 int
 recieve_handshake(struct peer *peer)
 {
-  if (!peer->info)
-  {
-    debug("client not initialized");
-    return -1;
-  }
-
   char handshake[HANSHAKE_S];
   if (recv(peer->sfd, handshake, HANSHAKE_S, 0) < 0)
   {
@@ -64,6 +53,9 @@ recieve_handshake(struct peer *peer)
   }
 
   peer->status = P_HDSK;
-  debug("handshake: done.");
+  verbose("%x%x%x: msg: recv: %s:%u handshake\n", (uint8_t)g_bt.info_hash[0],
+         (uint8_t)g_bt.info_hash[1], (uint8_t)g_bt.info_hash[2],
+          peer->ip, peer->port);
+ 
   return 0;
 }
