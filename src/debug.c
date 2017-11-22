@@ -38,7 +38,7 @@ verbose_have(struct peer *p)
   if (recv(p->sfd, &index, sizeof(int), 0) < 0)
     perror("Could not read");
 
-  verbose("have %d\n", ntohl(index));
+  verbose("have %u\n", ntohl(index));
 }
 
 void
