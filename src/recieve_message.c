@@ -60,49 +60,62 @@ write_data(char *data, struct peer *p, uint32_t len)
     uint32_t acc = 0;
     uint32_t i = 0;
     uint32_t flen = 0;
-    while (acc < p->downloading * 20 + p->offset)
+    while (acc < pos)
     {
       flen = dico_find_int(files->val.l[i], "length");
-      if (acc + len > p->downloading * 20 + p->offset)
+      if (acc + flen > pos)
         break;
-      acc += len;
+      acc += flen;
       i++;
     }
     char path[512];
     uint32_t written = 0;
     FILE *f = fopen(get_file_path(files->val.l[i], path), "r+");
+
+    flen = dico_find_int(files->val.l[i], "length");
+    debug("%u bytes to write on byte %u of %u bytes file", len, pos - acc, flen);
     fseek(f, pos - acc, SEEK_SET);
-    while ((written = fwrite(data, 1, len < flen ? len : flen, f)) < len)
+
+    acc = 0;
+    while ((written = fwrite(data, 1, len < flen ? len: flen, f)) < len)
     {
+      debug("writting %u/%u bytes to %s",
+          written, len, get_file_path(files->val.l[i], path));
+      acc += written;
       len -= written;
       data += written;
-      fclose(f);
-      f = fopen(get_file_path(files->val.l[++i], path), "r+");
+      if (acc >= flen)
+      {
+        i++;
+        flen = dico_find_int(files->val.l[i], "length");
+        fclose(f);
+        f = fopen(get_file_path(files->val.l[i], path), "r+");
+      }
     }
     fclose(f);
   }
 }
 
-static void
-verify_piece(struct peer *p)
-{
-  unsigned int len = 0;
-  unsigned char final_hash[20];
-  EVP_DigestFinal_ex(p->mdctx, final_hash, &len);
-  struct be_node *info_dic = dico_find(g_bt.torrent, "info");
-  char *pieces_hash = dico_find_str(info_dic, "pieces");
-  if (memcmp(pieces_hash + p->downloading * 20, final_hash, 20))
+  static void
+  verify_piece(struct peer *p)
   {
-    EVP_MD_CTX_destroy(p->mdctx);
-    p->mdctx = NULL;
-    p->downloaded = 1;
+    unsigned int len = 0;
+    unsigned char final_hash[20];
+    EVP_DigestFinal_ex(p->mdctx, final_hash, &len);
+    struct be_node *info_dic = dico_find(g_bt.torrent, "info");
+    char *pieces_hash = dico_find_str(info_dic, "pieces");
+    if (memcmp(pieces_hash + p->downloading * 20, final_hash, 20))
+    {
+      EVP_MD_CTX_destroy(p->mdctx);
+      p->mdctx = NULL;
+      p->downloaded = 1;
+    }
+    else
+    {
+      debug("PIECE NB %d NOT VERIFIED :(\n", p->downloading);
+      g_bt.pieces[p->downloading / 8] &= ~(1 << (7 - p->downloading % 8));
+    }
   }
-  else
-  {
-    debug("PIECE NB %d NOT VERIFIED :(\n", p->downloading);
-    g_bt.pieces[p->downloading / 8] &= ~(1 << (7 - p->downloading % 8));
-  }
-}
 
 static int
 recieve_data(struct message mess, struct peer *p)
@@ -124,11 +137,13 @@ recieve_data(struct message mess, struct peer *p)
   }
   if (p->offset >= p->last_block + B_SIZE)
   {
-    verbose("%x%x%x: msg: recv: %s:%u: piece %u %u\n", (uint8_t)g_bt.info_hash[0],
-         (uint8_t)g_bt.info_hash[1], (uint8_t)g_bt.info_hash[2],
-         p->ip, p->port, p->downloading, p->offset);
+    verbose("%x%x%x: msg: recv: %s:%u: piece %u %u\n",
+        (uint8_t)g_bt.info_hash[0], (uint8_t)g_bt.info_hash[1],
+        (uint8_t)g_bt.info_hash[2], p->ip, p->port, p->downloading, p->offset);
+
     debug("Piece %u : SUCCESS downloaded block %u/%u", p->downloading,
       p->offset / B_SIZE, g_bt.piece_size / B_SIZE);
+
     p->last_block += B_SIZE;
     p->offset = p->last_block;
     p->downloaded = 1;
@@ -159,6 +174,7 @@ recieve_piece(struct message mess, struct peer *p)
 
   p->downloading = ntohl(piece.index);
   p->offset = ntohl(piece.begin);
+  p->last_block = p->offset;
   return recieve_data(mess, p);
 }
 
