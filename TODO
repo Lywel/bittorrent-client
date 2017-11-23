@@ -27,15 +27,15 @@
   [x] free  : info_hash in create_request
   [x] free  : request in create_request
   [x] free  : answer in get_peer_list
-  [ ] close : socket in init_socket
-[ ] Create the debug function for the mandatory logs
+  [x] close : socket in init_socket
+[x] Create the debug function for the mandatory logs
 [x] Rename get_sha1 to compute_sha1()
 [ ] handle verbose option
   [x] tracker request
   [x] peer connection/disconnection
   [x] peer messages
-  [ ] verbose have
-  [ ] other verbose
+  [x] verbose have
+  [x] other verbose
 [ ] getname for dump peers
 [x] Create the global structure
 [x] Create the download loop
@@ -49,7 +49,8 @@
 [ ] coding style
 [ ] make executable in current folder
 [ ] do not create directoy tree for non download options
-[ ] handle peer reconnection
+[x] handle peer reconnection
 [ ] handle end of download
 [ ] do not create file when options
-[ ] when hash not verified remove piece from local bitfield
+[x] when hash not verified remove piece from local bitfield
+[ ] autoreconf in ./bootstrap file
