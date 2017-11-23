@@ -66,13 +66,22 @@ handle_event(struct epoll_event evt)
   return 0;
 }
 
+static int
+no_peer_downloading(void)
+{
+  for (long long i = 0; g_bt.peers[i]; ++i)
+    if (!g_bt.peers[i]->downloaded)
+      return 0;
+  return 1;
+}
 
 int
 network_loop(int efd, struct epoll_event *events)
 {
   time_t loop_start = time(NULL);
 
-  while (1)
+  char loop = 1;
+  while (loop)
   {
     int n = epoll_wait(efd, events, 64, 1000);
     if (n < 0)
@@ -92,8 +101,12 @@ network_loop(int efd, struct epoll_event *events)
       struct be_node *peers = get_peer_list_from_tracker(g_bt.torrent);
       free(peers);
       for (long long i = 0; g_bt.peers[i]; ++i)
+      {
         if (g_bt.peers[i]->sfd < 0 && get_interesting_piece(NULL))
           init_epoll_event(g_bt.peers[i], efd);
+        if (get_interesting_piece(NULL) && no_peer_downloading())
+          loop = 0;
+      }
     }
   }
   return 0;
