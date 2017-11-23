@@ -62,6 +62,8 @@ handle_event(struct epoll_event evt)
     }
     if (!peer->am_choking && peer->am_interested && peer->downloaded == 1)
       send_request_message(peer);
+    else if (peer->am_interested && peer->downloaded == 1)
+      send_message_type(INTERESTED, peer);
   }
   return 0;
 }
