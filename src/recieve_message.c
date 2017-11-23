@@ -104,7 +104,6 @@ verify_piece(struct peer *p)
   EVP_DigestFinal_ex(p->mdctx, final_hash, &len);
   struct be_node *info_dic = dico_find(g_bt.torrent, "info");
   char *pieces_hash = dico_find_str(info_dic, "pieces");
-  debug("cmparing hashs\nref: %.20s\ncom: %.20s",pieces_hash + p->downloading * 20, final_hash);
   if (!memcmp(pieces_hash + p->downloading * 20, final_hash, 20))
   {
     debug("PIECE NB %d VERIVERIFIED :D\n", p->downloading);
@@ -151,7 +150,7 @@ recieve_data(struct message mess, struct peer *p)
     p->offset = p->last_block;
     p->downloaded = 1;
   }
-  if (p->offset >= g_bt.piece_size)
+  if (p->offset >= g_bt.piece_size && (p->downloaded != -1))
   {
     debug("PIECE %u IS DOWNLOADED", p->downloading);
     verify_piece(p);

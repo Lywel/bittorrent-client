@@ -92,6 +92,9 @@ send_request_message(struct peer *p)
   req.begin = htonl(p->offset);
   if (pieces_nb == 1)
     req.length = htonl(len);
+  else if (p->offset / B_SIZE == g_bt.piece_size / B_SIZE
+            && (int)pieces_nb - 1 == p->downloading)
+    req.length = htonl(len - (p->downloading * g_bt.piece_size + p->offset));
   else
     req.length = htonl(B_SIZE);
   req.len = htonl(13);
