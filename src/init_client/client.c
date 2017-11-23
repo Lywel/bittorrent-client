@@ -76,6 +76,27 @@ create_file(struct be_node *n)
 }
 
 void
+create_files()
+{
+  struct be_node *info_dic = dico_find(g_bt.torrent, "info");
+  struct be_node *files = dico_find(info_dic, "files");
+  if (!files)
+  {
+    char *path = dico_find_str(info_dic, "name");
+    FILE *f = fopen(path, "w");
+    fclose(f);
+  }
+  else
+  {
+    char *path = dico_find_str(info_dic, "name");
+    mkdir(path, 0700);
+    chdir(path);
+    for (uint32_t i = 0; files->val.l[i]; ++i)
+      create_file(dico_find(files->val.l[i], "path"));
+  }
+}
+
+void
 init_client(void)
 {
   g_bt.verbose = (g_bt.verbose == 1) || 0;
@@ -105,21 +126,6 @@ init_client(void)
   g_bt.info_hash = compute_sha1(info_be);
   buffer_free(info_be);
 
-  struct be_node *files = dico_find(info_dic, "files");
-  if (!files)
-  {
-    char *path = dico_find_str(info_dic, "name");
-    FILE *f = fopen(path, "w");
-    fclose(f);
-  }
-  else
-  {
-    char *path = dico_find_str(info_dic, "name");
-    mkdir(path, 0700);
-    chdir(path);
-    for (uint32_t i = 0; files->val.l[i]; ++i)
-      create_file(dico_find(files->val.l[i], "path"));
-  }
 }
 
 void

@@ -20,6 +20,7 @@ download(void)
 
   struct be_node *peers = get_peer_list_from_tracker(g_bt.torrent);
   free(peers);
+  create_files();
 
   debug("peer list is ready");
 
