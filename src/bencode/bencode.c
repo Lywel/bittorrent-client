@@ -89,7 +89,7 @@ bencode_encode(struct be_node *node)
     return buffer_init(tmp, len + log10(len) + 2);
   case BE_INT:
     len = node->val.i;
-    len = len ? log10(len < 0 ? -len : len) + (len < 0) : 1;
+    len = len ? log10(len < 0 ? -len : len) + (len < 0) : 0;
     tmp = calloc(len + 4, sizeof(char));
     sprintf(tmp, "i%llde", node->val.i);
     return buffer_init(tmp, len + 3);
