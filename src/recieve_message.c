@@ -96,32 +96,34 @@ write_data(char *data, struct peer *p, uint32_t len)
   }
 }
 
-  static void
-  verify_piece(struct peer *p)
+static void
+verify_piece(struct peer *p)
+{
+  unsigned int len = 0;
+  unsigned char final_hash[20];
+  EVP_DigestFinal_ex(p->mdctx, final_hash, &len);
+  struct be_node *info_dic = dico_find(g_bt.torrent, "info");
+  char *pieces_hash = dico_find_str(info_dic, "pieces");
+  if (memcmp(pieces_hash + p->downloading * 20, final_hash, 20))
   {
-    unsigned int len = 0;
-    unsigned char final_hash[20];
-    EVP_DigestFinal_ex(p->mdctx, final_hash, &len);
-    struct be_node *info_dic = dico_find(g_bt.torrent, "info");
-    char *pieces_hash = dico_find_str(info_dic, "pieces");
-    if (memcmp(pieces_hash + p->downloading * 20, final_hash, 20))
-    {
-      EVP_MD_CTX_destroy(p->mdctx);
-      p->mdctx = NULL;
-      p->downloaded = 1;
-    }
-    else
-    {
-      debug("PIECE NB %d NOT VERIFIED :(\n", p->downloading);
-      g_bt.pieces[p->downloading / 8] &= ~(1 << (7 - p->downloading % 8));
-    }
+    debug("PIECE NB %d VERIVERIFIED :D\n", p->downloading);
+    EVP_MD_CTX_destroy(p->mdctx);
+    p->mdctx = NULL;
+    p->downloaded = 1;
   }
+  else
+  {
+    debug("PIECE NB %d NOT VERIFIED :(\n", p->downloading);
+    g_bt.pieces[p->downloading / 8] &= ~(1 << (7 - p->downloading % 8));
+  }
+}
 
 static int
 recieve_data(struct message mess, struct peer *p)
 {
   if (mess.id != 7)
   {
+    update_sha1(p, (void *)&mess, sizeof(struct message));
     write_data((void *)&mess, p, sizeof(struct message));
     p->offset += sizeof(struct message);
   }
