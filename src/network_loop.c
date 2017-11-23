@@ -86,7 +86,7 @@ network_loop(int efd, struct epoll_event *events)
     for (int i = 0; i < n; ++i)
       handle_event(events[i]);
 
-    if (time(NULL) - loop_start > 20)//g_bt.peer_list_timeout)
+    if (time(NULL) - loop_start > g_bt.peer_list_timeout)
     {
       loop_start = time(NULL);
       struct be_node *peers = get_peer_list_from_tracker(g_bt.torrent);
