@@ -104,11 +104,11 @@ verify_piece(struct peer *p)
   EVP_DigestFinal_ex(p->mdctx, final_hash, &len);
   struct be_node *info_dic = dico_find(g_bt.torrent, "info");
   char *pieces_hash = dico_find_str(info_dic, "pieces");
-  if (memcmp(pieces_hash + p->downloading * 20, final_hash, 20))
+  debug("cmparing hashs\nref: %.20s\ncom: %.20s",pieces_hash + p->downloading * 20, final_hash);
+  if (!memcmp(pieces_hash + p->downloading * 20, final_hash, 20))
   {
     debug("PIECE NB %d VERIVERIFIED :D\n", p->downloading);
     EVP_MD_CTX_destroy(p->mdctx);
-    p->mdctx = NULL;
     p->downloaded = 1;
   }
   else
@@ -116,6 +116,7 @@ verify_piece(struct peer *p)
     debug("PIECE NB %d NOT VERIFIED :(\n", p->downloading);
     g_bt.pieces[p->downloading / 8] &= ~(1 << (7 - p->downloading % 8));
   }
+  p->mdctx = NULL;
 }
 
 static int
