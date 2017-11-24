@@ -23,7 +23,6 @@ download(void)
   debug("starting download for %s", g_bt.path);
 
   struct be_node *peers = get_peer_list_from_tracker(g_bt.torrent);
-  free(peers);
   create_files();
 
   debug("peer list is ready");
@@ -41,6 +40,7 @@ download(void)
   struct epoll_event *events = calloc(64, sizeof(struct epoll_event));
   int res = network_loop(efd, events);
   free(events);
+  bencode_free_node(peers);
   return res;
 }
 
