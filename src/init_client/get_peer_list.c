@@ -21,9 +21,7 @@ build_tracker_uri(struct be_node *dico, CURL *curl)
     struct be_node **l  = dico_find(dico_find(g_bt.torrent, "info"),
                                     "files")->val.l;
     for (int i = 0; l[i]; ++i)
-    {
       left += dico_find_int(l[i], "length");
-    }
   }
   else
     left = length->val.i;
