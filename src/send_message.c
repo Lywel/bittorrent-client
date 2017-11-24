@@ -72,13 +72,9 @@ send_request_message(struct peer *p)
     peer_socket_close(p);
     return -1;
   }
-  long long len = 0;
   struct be_node *info_dic = dico_find(g_bt.torrent, "info");
-  struct be_node *length = dico_find(info_dic, "length");
   uint32_t pieces_nb = dico_find(info_dic, "pieces")->val.s->len / 20;
 
-  if (length)
-    len = length->val.i;
   debug("requesting piece nb %d with an offset of %d",
          p->downloading, p->offset);
   p->downloaded = 2;
@@ -86,17 +82,21 @@ send_request_message(struct peer *p)
           (uint8_t)g_bt.info_hash[1], (uint8_t)g_bt.info_hash[2],
           p->ip, p->port);
 
-  struct request req;
-  req.id = 6;
-  req.index = htonl(p->downloading);
-  req.begin = htonl(p->offset);
-  if (pieces_nb == 1)
-    req.length = htonl(len);
-  else if (p->offset / B_SIZE == g_bt.piece_size / B_SIZE
-            && (int)pieces_nb - 1 == p->downloading)
-    req.length = htonl(len - (p->downloading * g_bt.piece_size + p->offset));
-  else
-    req.length = htonl(B_SIZE);
+    struct request req;
+    req.id = 6;
+    req.index = htonl(p->downloading);
+    req.begin = htonl(p->offset);
+
+    if (p->downloading == (int)pieces_nb - 1
+      && p->offset + B_SIZE >= g_bt.torrent_size % g_bt.piece_size)
+    {
+      debug("REQUESTING THE LEGENDARY 4 MISSING PERCENTS !!!\n requesting %u bytes.", g_bt.torrent_size);
+      req.length = htonl(g_bt.torrent_size % g_bt.piece_size - p->offset);
+    }
+    else
+      req.length = htonl(B_SIZE);
+
+  p->requested_size = ntohl(req.length);
   req.len = htonl(13);
 
   verbose("request %d %d %d\n", p->downloading, p->offset, B_SIZE);

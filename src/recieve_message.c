@@ -139,7 +139,8 @@ recieve_data(struct message mess, struct peer *p)
     write_data(buf, p, read);
     p->offset += read;
   }
-  if (p->offset >= p->last_block + B_SIZE)
+  debug("req size = %u", p->requested_size);
+  if (p->offset >= p->last_block + p->requested_size)
   {
     verbose("%x%x%x: msg: recv: %s:%u: piece %u %u\n",
         (uint8_t)g_bt.info_hash[0], (uint8_t)g_bt.info_hash[1],
