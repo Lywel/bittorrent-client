@@ -65,7 +65,7 @@ dump_peers(struct peer **peers)
   struct be_node *peer_list = get_peer_list_from_tracker(g_bt.torrent);
   struct be_node *peer = dico_find(peer_list, "peers");
 
-  for (long long i = 0; peers[i] && peer->val.l[i]; ++i)
+  for (long long i = 0; peers[i]; ++i)
   {
     char hbuf[NI_MAXHOST];
     if (getnameinfo((struct sockaddr *)peers[i]->info,
