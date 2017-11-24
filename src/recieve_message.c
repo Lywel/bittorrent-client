@@ -73,15 +73,17 @@ write_data(char *data, struct peer *p, uint32_t len)
     FILE *f = fopen(get_file_path(files->val.l[i], path), "r+");
 
     flen = dico_find_int(files->val.l[i], "length");
-    debug("%u bytes to write on byte %u of %u bytes file", len, pos - acc, flen);
-    fseek(f, pos - acc, SEEK_SET);
+    acc = pos - acc;
+    debug("%u bytes to write on byte %u of %u bytes file", len, acc, flen);
+    fseek(f, acc, SEEK_SET);
+    flen -= acc;
 
-    acc = 0;
     while ((written = fwrite(data, 1, len < flen ? len: flen, f)) < len)
     {
       debug("writting %u/%u bytes to %s",
           written, len, get_file_path(files->val.l[i], path));
       acc += written;
+      flen -= written;
       len -= written;
       data += written;
       if (acc >= flen)

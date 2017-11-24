@@ -56,6 +56,6 @@ recieve_handshake(struct peer *peer)
   verbose("%x%x%x: msg: recv: %s:%u: handshake\n", (uint8_t)g_bt.info_hash[0],
          (uint8_t)g_bt.info_hash[1], (uint8_t)g_bt.info_hash[2],
           peer->ip, peer->port);
- 
+
   return 0;
 }
