@@ -31,7 +31,7 @@ send_handshake(struct peer *peer)
     return -1;
   }
 
-  verbose("%x%x%x: msg: send: %s:%u handshake\n", (uint8_t)g_bt.info_hash[0],
+  verbose("%x%x%x: msg: send: %s:%u: handshake\n", (uint8_t)g_bt.info_hash[0],
          (uint8_t)g_bt.info_hash[1], (uint8_t)g_bt.info_hash[2],
           peer->ip, peer->port);
   return 0;
@@ -53,7 +53,7 @@ recieve_handshake(struct peer *peer)
   }
 
   peer->status = P_HDSK;
-  verbose("%x%x%x: msg: recv: %s:%u handshake\n", (uint8_t)g_bt.info_hash[0],
+  verbose("%x%x%x: msg: recv: %s:%u: handshake\n", (uint8_t)g_bt.info_hash[0],
          (uint8_t)g_bt.info_hash[1], (uint8_t)g_bt.info_hash[2],
           peer->ip, peer->port);
  

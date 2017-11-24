@@ -82,7 +82,7 @@ send_request_message(struct peer *p)
   debug("requesting piece nb %d with an offset of %d",
          p->downloading, p->offset);
   p->downloaded = 2;
-  verbose("%x%x%x: msg: send: %s:%u ", (uint8_t)g_bt.info_hash[0],
+  verbose("%x%x%x: msg: send: %s:%u: ", (uint8_t)g_bt.info_hash[0],
           (uint8_t)g_bt.info_hash[1], (uint8_t)g_bt.info_hash[2],
           p->ip, p->port);
 
