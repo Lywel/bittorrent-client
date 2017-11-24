@@ -1,9 +1,9 @@
 AM_CFLAGS = -Wall -Wextra -Werror -std=c99 -pedantic
 AM_LDFLAGS = -lcurl -lcrypto -lm
 
-bin_PROGRAMS = my-bittorrent
-my_bittorrent_CPPFLAGS = -I$(srcdir)/include
-my_bittorrent_SOURCES = \
+bin_PROGRAMS = $(top_builddir)/my-bittorrent
+__top_builddir__my_bittorrent_CPPFLAGS = -I$(srcdir)/include
+__top_builddir__my_bittorrent_SOURCES = \
   bencode/bencode.c \
   bencode/bencode_json.c \
   bencode/bencode_parser.c \
