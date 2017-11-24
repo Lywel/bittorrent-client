@@ -22,7 +22,6 @@
 [x] Create the autotools config
 [ ] More advanced autotools config
 [ ] Split he project in modules
-[ ] Compile each modules as a distinct static 'comfort' library
 [x] TO FREE // CLOSE
   [x] free  : info_hash in create_request
   [x] free  : request in create_request
@@ -30,13 +29,13 @@
   [x] close : socket in init_socket
 [x] Create the debug function for the mandatory logs
 [x] Rename get_sha1 to compute_sha1()
-[ ] handle verbose option
+[x] handle verbose option
   [x] tracker request
   [x] peer connection/disconnection
   [x] peer messages
   [x] verbose have
   [x] other verbose
-[ ] getname for dump peers
+[x] getname for dump peers
 [x] Create the global structure
 [x] Create the download loop
 [x] set socket timout https://stackoverflow.com/questions/4181784/how-to-set-socket-timeout-in-c-when-making-multiple-connections
@@ -47,10 +46,10 @@
 [x] Remove the limit of 2 peers in my-bittorent.c : download :72 (i < 2)
 [x] handle multifile
 [ ] coding style
-[ ] make executable in current folder
-[ ] do not create directoy tree for non download options
+[x] make executable in current folder
+[x] do not create directoy tree for non download options
 [x] handle peer reconnection
-[ ] handle end of download
-[ ] do not create file when options
+[x] handle end of download
+[x] do not create file when options
 [x] when hash not verified remove piece from local bitfield
 [ ] autoreconf in ./bootstrap file
