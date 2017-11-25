@@ -157,8 +157,6 @@ recieve_data(struct message mess, struct peer *p)
   {
     debug("PIECE %u IS DOWNLOADED", p->downloading);
     verify_piece(p);
-    debug("OUR LOCAL BITFIELD IS:");
-    verbose_bitfield(g_bt.pieces_len, g_bt.pieces);
     p->downloading = -1;
   }
   return read;
@@ -175,7 +173,7 @@ recieve_piece(struct message mess, struct peer *p)
   }
 
   p->downloaded = 0;
-  verbose("%u %u\n", ntohl(piece.index), ntohl(piece.begin));
+  verbose("piece %u %u\n", ntohl(piece.index), ntohl(piece.begin));
 
   p->downloading = ntohl(piece.index);
   p->offset = ntohl(piece.begin);
