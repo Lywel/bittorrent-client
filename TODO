@@ -3,8 +3,8 @@
   [x] read the official bitTorrent doc and link it with subject
   [x] write helper file with clearer descriptions of functions to implement
 [x] Make a meeting at 5:30 p.m. on tuesday to discuss our plans for multithreading implementation
-[ ] Make a testsuite
-[ ] Make a README
+[x] Make a testsuite
+[x] Make a README
 [x] Parse the bencode
   [x] Open the file and store the content in a string
   [x] Check the string recusivly for datatypes
@@ -20,7 +20,7 @@
   [x] Encode lists
   [x] Encode dictionaries
 [x] Create the autotools config
-[ ] More advanced autotools config
+[x] More advanced autotools config
 [ ] Split he project in modules
 [x] TO FREE // CLOSE
   [x] free  : info_hash in create_request
@@ -52,4 +52,4 @@
 [x] handle end of download
 [x] do not create file when options
 [x] when hash not verified remove piece from local bitfield
-[ ] autoreconf in ./bootstrap file
+[x] autoreconf in ./bootstrap file

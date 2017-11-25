@@ -22,6 +22,7 @@ I)  Building executable
                               # on updating the Makefile
     ```
 * Run test suite
+  make check
 
 II) Usage
 

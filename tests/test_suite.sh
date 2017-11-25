@@ -17,5 +17,3 @@ evince myreadiso-subject.pdf
 printf "\nROGUE\n"
 ./my-bittorrent ./tests/torrents/images_rogue.torrent --verbose
 ls -l images
-
-printf "\nSUCCESS 5/5\n"
