@@ -1,4 +1,4 @@
-AM_CFLAGS = -Wall -Wextra -Werror -std=c99 -pedantic
+AM_CFLAGS = -Wall -Wextra -Werror -std=c99 -pedantic -D_POSIX_C_SOURCE=200112L
 AM_LDFLAGS = -lcurl -lcrypto -lm
 
 bin_PROGRAMS = $(top_builddir)/my-bittorrent

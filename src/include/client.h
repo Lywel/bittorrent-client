@@ -28,6 +28,7 @@ struct peer
   EVP_MD_CTX *mdctx;
   int downloading;
   char downloaded;
+  uint32_t requested_size;
   enum peer_status status;
 };
 
@@ -44,6 +45,7 @@ struct bittorent
   char *peer_id;
   uint16_t port;
   time_t peer_list_timeout;
+  uint32_t torrent_size;
 };
 
 extern struct bittorent g_bt;

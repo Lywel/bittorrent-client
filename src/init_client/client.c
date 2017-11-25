@@ -83,6 +83,7 @@ create_files()
   if (!files)
   {
     char *path = dico_find_str(info_dic, "name");
+    g_bt.torrent_size = dico_find_int(info_dic, "length");
     FILE *f = fopen(path, "w");
     fclose(f);
   }
@@ -91,8 +92,12 @@ create_files()
     char *path = dico_find_str(info_dic, "name");
     mkdir(path, 0700);
     chdir(path);
+    g_bt.torrent_size = 0;
     for (uint32_t i = 0; files->val.l[i]; ++i)
+    {
       create_file(dico_find(files->val.l[i], "path"));
+      g_bt.torrent_size += dico_find_int(files->val.l[i], "length");
+    }
   }
 }
 

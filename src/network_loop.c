@@ -72,7 +72,7 @@ static int
 no_peer_downloading(void)
 {
   for (long long i = 0; g_bt.peers[i]; ++i)
-    if (!g_bt.peers[i]->downloaded)
+    if (g_bt.peers[i]->downloaded != 1)
       return 0;
   return 1;
 }
@@ -106,10 +106,10 @@ network_loop(int efd, struct epoll_event *events)
       {
         if (g_bt.peers[i]->sfd < 0 && get_interesting_piece(NULL))
           init_epoll_event(g_bt.peers[i], efd);
-        if (get_interesting_piece(NULL) && no_peer_downloading())
-          loop = 0;
       }
     }
+    if (!get_interesting_piece(NULL) && no_peer_downloading())
+      loop = 0;
   }
   return 0;
 }

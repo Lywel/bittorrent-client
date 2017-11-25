@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include <sys/socket.h>
+#include <netdb.h>
 #include "bencode.h"
 #include "bencode_json.h"
 #include "get_peer_list.h"
@@ -11,6 +13,8 @@
 #include "socket_close.h"
 #include "network_loop.h"
 
+#define NI_MAXHOST 1025
+
 struct bittorent g_bt;
 
 static int
@@ -19,7 +23,6 @@ download(void)
   debug("starting download for %s", g_bt.path);
 
   struct be_node *peers = get_peer_list_from_tracker(g_bt.torrent);
-  free(peers);
   create_files();
 
   debug("peer list is ready");
@@ -37,6 +40,7 @@ download(void)
   struct epoll_event *events = calloc(64, sizeof(struct epoll_event));
   int res = network_loop(efd, events);
   free(events);
+  bencode_free_node(peers);
   return res;
 }
 
@@ -48,22 +52,30 @@ print_usage(char *bin)
   return -1;
 }
 
-  static int
-  pretty_print_torrent_file(void)
-  {
-    bencode_dump_json(g_bt.torrent);
-    return 0;
-  }
+static int
+pretty_print_torrent_file(void)
+{
+  bencode_dump_json(g_bt.torrent);
+  return 0;
+}
 
 static int
-dump_peers(void)
+dump_peers(struct peer **peers)
 {
   struct be_node *peer_list = get_peer_list_from_tracker(g_bt.torrent);
-  struct be_node *peers = dico_find(peer_list, "peers");
+  struct be_node *peer = dico_find(peer_list, "peers");
 
-  for (long long i = 0; peers && peers->val.l[i]; ++i)
-    printf("%s:%lld\n", dico_find_str(peers->val.l[i], "ip"),
-                    dico_find_int(peers->val.l[i], "port"));
+  for (long long i = 0; peers[i]; ++i)
+  {
+    char hbuf[NI_MAXHOST];
+    if (getnameinfo((struct sockaddr *)peers[i]->info,
+          sizeof(struct sockaddr_in), hbuf, sizeof(hbuf), NULL, 0,
+          NI_NUMERICSERV | NI_NUMERICHOST))
+      printf("%s:%lld\n", dico_find_str(peer->val.l[i], "ip"),
+                    dico_find_int(peer->val.l[i], "port"));
+    else
+      printf("%s:%lld\n", hbuf, dico_find_int(peer->val.l[i], "port"));
+  }
 
   bencode_free_node(peer_list);
   return 0;
@@ -94,13 +106,16 @@ parse_args(int argc, char **argv)
 
   init_client();
   int res = 0;
+  struct be_node *sl = NULL;  
   switch (action)
   {
   case 'p':
     res = pretty_print_torrent_file();
     break;
   case 'd':
-    res = dump_peers();
+    get_peer_list_from_tracker(g_bt.torrent);
+    free(sl);
+    res = dump_peers(g_bt.peers);
     break;
   default:
     res = download();
